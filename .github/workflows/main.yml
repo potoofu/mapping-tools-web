@@ -14,7 +14,7 @@ jobs:
         with:
           dotnet-version: "3.1.x"
       - name: Publish Project
-        run: dotnet publish MappingToolsWeb.csproj -c Release -o release --nologo
+        run: dotnet publish MappingToolsWeb/MappingToolsWeb.csproj -c Release -o release --nologo
       - name: Commit to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
