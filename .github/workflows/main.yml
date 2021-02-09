@@ -15,11 +15,11 @@ jobs:
           dotnet-version: "3.1.x"
       - name: Publish Project
         run: dotnet publish MappingToolsWeb/MappingToolsWeb.csproj -c Release -o release --nologo
+      - name: Change base-tag in index.html 
+        run: sed -i 's/<base href="\/" \/>/<base href="\/mapping-tools-web\/" \/>/g' release/wwwroot/index.html
       - name: Commit to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
           FOLDER: release/wwwroot
-      - name: Change base-tag in index.html 
-        run: sed -i 's/<base href="\/" \/>/<base href="\/mapping-tools-web\/" \/>/g' release/wwwroot/index.html
