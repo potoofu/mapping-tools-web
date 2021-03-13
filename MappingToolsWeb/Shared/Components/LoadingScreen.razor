@@ -1,11 +1,13 @@
-﻿@if (isLoaded)
+﻿@inject NavigationManager NavManager
+
+@if (isLoaded)
 {
     @ChildContent
 }
 else
 {
     <div class="centered loading-container">
-        <img style="width: 20vw; height: 20vh;" class="spinning-logo" src="icons/mt_logo.svg" />
+        <img style="width: 20vw; height: 20vh;" class="spinning-logo" src="@(NavManager.BaseUri + "icons/mt_logo.svg")" />
     </div>
 }
 
