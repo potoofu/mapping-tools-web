@@ -29,7 +29,7 @@
       "url": "icons\/mt_logo.svg"
     },
     {
-      "hash": "sha256-SyxJoOGd7AnpsoVD1iQhP8I6AeeR5QjdQPLcdMC5t9c=",
+      "hash": "sha256-URaSPkf6EyjAOpSlh+ItR6ka5VIQ2vv/5ogG3MXrf4I=",
       "url": "index.html"
     },
     {
