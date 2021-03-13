@@ -145,7 +145,7 @@
       "url": "_framework\/MappingToolsWeb.IndexedDB.dll"
     },
     {
-      "hash": "sha256-86XetCpkYAyMvCDK1F7kHKDiBkL5lV\/qrn\/E6SyHqMI=",
+      "hash": "sha256-rLKjb\/yuW8XNDIKvEGtv6kRyqPWLebDCBblpxwjLmiU=",
       "url": "_framework\/MappingToolsWeb.dll"
     },
     {
@@ -217,7 +217,7 @@
       "url": "_framework\/System.Private.CoreLib.dll"
     },
     {
-      "hash": "sha256-A9\/rrgeADZX+wuzzi+MMsnVFzDrcdAVe0e2++A7Oois=",
+      "hash": "sha256-yiDWudx+Br9zjkGdwGsqybY2YGM5G7L1dpfoAWXjnlo=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -225,5 +225,5 @@
       "url": "_framework\/blazor.webassembly.js"
     }
   ],
-  "version": "TL69Ezmi"
+  "version": "Md7+XQVs"
 };
