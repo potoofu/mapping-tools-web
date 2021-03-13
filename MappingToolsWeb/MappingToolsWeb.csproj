@@ -47,7 +47,7 @@
     <Content Update="wwwroot\icons\mt_logo.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="wwwroot\logo-512.png">
+    <Content Update="wwwroot\logo512.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
