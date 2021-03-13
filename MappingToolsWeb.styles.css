@@ -1,0 +1,54 @@
+/* /Shared/Components/FileSystem/FileTable.razor.rz.scp.css */
+.file-table-list[b-wbc1o7c8uu] {
+    list-style-type: none;
+}
+
+ul.file-table-list li[b-wbc1o7c8uu] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* /Shared/Components/LoadingScreen.razor.rz.scp.css */
+@keyframes spin-b-dfo5wz5qmm {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(359deg);
+    }
+}
+
+.spinning-logo[b-dfo5wz5qmm] {
+    animation: spin-b-dfo5wz5qmm 4s linear infinite;
+}
+
+.centered[b-dfo5wz5qmm] {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.loading-container[b-dfo5wz5qmm] {
+    text-align: center;
+}
+/* /Shared/MainLayout.razor.rz.scp.css */
+.grid-container[b-79uzc3ut7x] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    grid-template-rows: 80px auto;
+    grid-template-areas: "navmenu navmenu" "bodycontent filesystem"
+}
+
+.nav-menu[b-79uzc3ut7x] {
+    grid-area: navmenu;
+}
+
+.file-system[b-79uzc3ut7x] {
+    grid-area: filesystem;
+}
+
+.body-content[b-79uzc3ut7x] {
+    grid-area: bodycontent;
+}
