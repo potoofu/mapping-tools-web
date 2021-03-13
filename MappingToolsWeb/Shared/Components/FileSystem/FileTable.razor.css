@@ -1,0 +1,9 @@
+﻿.file-table-list {
+    list-style-type: none;
+}
+
+ul.file-table-list li {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

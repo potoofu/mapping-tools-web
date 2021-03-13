@@ -1,0 +1,23 @@
+﻿@if (isLoaded)
+{
+    @ChildContent
+}
+else
+{
+    <div class="centered loading-container">
+        <img style="width: 20vw; height: 20vh;" class="spinning-logo" src="static/icons/mt_logo.svg" />
+    </div>
+}
+
+@code {
+    protected bool isLoaded {get; set;}
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(4000);
+        isLoaded = true;
+    }
+}

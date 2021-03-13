@@ -1,0 +1,22 @@
+﻿<style>
+    .navbar-brand {
+        height: 100%;
+    }
+
+    .navbar-brand img {
+        height: 100%;
+    }
+</style>
+
+<nav class="navbar @Class" role="navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href="/">
+      <img src="/static/icons/mt_logo.svg">
+    </a>
+  </div>
+</nav>
+
+@code {
+    [Parameter]
+    public string Class { get; set; }
+}

@@ -1,0 +1,24 @@
+﻿@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(359deg);
+    }
+}
+
+.spinning-logo {
+    animation: spin 4s linear infinite;
+}
+
+.centered {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.loading-container {
+    text-align: center;
+}

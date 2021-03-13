@@ -1,0 +1,87 @@
+﻿@using TG.Blazor.IndexedDB
+@using MappingToolsWeb.IndexedDB
+@using MappingToolsWeb.IndexedDB.Records
+@using MappingToolsWeb.IndexedDB.Records.Implementations
+
+@inject IndexedDBManager IndexedDbMgr
+@inject IContentTagManager IContentTagManager
+
+<div hidden="@(!ShowContent)">
+    @if(Files.Count > 0) {
+    <h3>@Name</h3>
+    
+    <ul class="file-table-list">
+        @foreach(var file in Files) {
+            <li>
+                <div class="file-table-list-container" title="@file.Name">
+                    @file.Name
+                </div>
+            </li>
+        }
+    </ul>
+}
+</div>
+
+<p hidden="@(!ShowLoader)">Loading...</p>
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = "NOT SET";
+
+    [Parameter]
+    public ContentTag Tag { get; set; } = ContentTag.Undefined;
+
+    public List<IFileRecord> Files { get; } = new List<IFileRecord>();
+
+    private bool ShowContent { get; set; }
+    private bool ShowLoader { get; set; } = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var files = await IndexedDbMgr.GetRecords<FileRecord>("files");
+
+        foreach(var file in files) {
+            if(file.Tag == Tag) {
+                Files.Add(file);
+            }
+        }
+
+        ShowContent = true;
+        ShowLoader = false;
+    }
+
+    
+
+    public async Task AddFileAsync(IBrowserFile file, long maxFileSize = 1024000000)
+    {
+        ShowContent = false;
+        ShowLoader = true;
+
+        StateHasChanged();
+
+        using var fileStream = file.OpenReadStream(maxFileSize);
+
+        var buffer = new byte[fileStream.Length];
+
+        await fileStream.ReadAsync(buffer);
+
+        var fileRecord = new FileRecord {
+            Name = file.Name,
+            Tag = Tag,
+            LastModified = DateTime.Now,
+            Data = buffer
+        };
+
+        await IndexedDbMgr.AddRecord(new StoreRecord<IFileRecord> {
+            Storename = "files",
+            Data = fileRecord
+        });
+
+        Files.Add(fileRecord);
+
+        ShowLoader = false;
+        ShowContent = true;
+
+        StateHasChanged();
+    }
+}

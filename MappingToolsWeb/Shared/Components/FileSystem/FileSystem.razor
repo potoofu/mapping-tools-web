@@ -1,0 +1,57 @@
+﻿@using MappingToolsWeb.IndexedDB
+
+@inject IContentTagManager ContentTagManager
+<div class="@Class">
+    <h3>Files</h3>
+
+    <p>
+        <InputFile class="test" OnChange="@OnInputFileChange" multiple />
+    </p>
+
+    <FileTable @ref="_audioTable" Name="Audio" Tag="ContentTag.Audio" />
+    <FileTable @ref="_imageTable" Name="Image" Tag="ContentTag.Image" />
+    <FileTable @ref="_beatmapTable" Name="Beatmap" Tag="ContentTag.OsuBeatmap" />
+    <FileTable @ref="_storyboardTable" Name="Storyboard" Tag="ContentTag.OsuStoryboard" />
+    <FileTable @ref="_videoTable" Name="Video" Tag="ContentTag.Video" />
+    <FileTable @ref="_undefinedTable" Name="Undefined" Tag="ContentTag.Undefined" />
+</div>
+
+
+@code {
+    [Parameter]
+    public string Class { get; set; }
+
+    protected FileTable _audioTable;
+    protected FileTable _imageTable;
+    protected FileTable _beatmapTable;
+    protected FileTable _storyboardTable;
+    protected FileTable _videoTable;
+    protected FileTable _undefinedTable;
+
+    protected async Task OnInputFileChange(InputFileChangeEventArgs e) {
+        var files = e.GetMultipleFiles();
+
+        foreach(var file in files) {
+            var fileTable = GetFileTableByFileContent(file);
+
+            await fileTable.AddFileAsync(file);
+        }  
+    }
+
+    private FileTable GetFileTableByFileContent(IBrowserFile file) {
+        switch(ContentTagManager.GetContentTag(file.Name, file.ContentType)) {
+            case ContentTag.Audio:
+                return _audioTable;
+            case ContentTag.Image:
+                return _imageTable;
+            case ContentTag.OsuBeatmap:
+                return _beatmapTable;
+            case ContentTag.OsuStoryboard:
+                return _storyboardTable;
+            case ContentTag.Video:
+                return _videoTable;
+            default:
+                return _undefinedTable;
+        }
+    }
+}

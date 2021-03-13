@@ -1,15 +1,19 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="sidebar">
-    <NavMenu />
+@using MappingToolsWeb.Shared.Components
+@using MappingToolsWeb.Shared.Components.FileSystem
+
+<style>
+    
+</style>
+
+<div class="grid-container main-container">
+    <NavMenu Class="nav-menu" />
+    <FileSystem Class="file-system" />
+    <div class="body-content">@Body</div>
 </div>
 
-<div class="main">
-    <div class="top-row px-4">
-        <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
-    </div>
-
-    <div class="content px-4">
-        @Body
-    </div>
-</div>
+@code {
+    public string MainColor { get; } = "rgba(18, 18, 18, 1)";
+    public string TextColor { get; } = "rgba(246, 247, 235, 1)";
+}

@@ -9,10 +9,10 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT : true
     steps:
       - uses: actions/checkout@v2
-      - name: Setup .NET Core SDK
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: "3.1.x"
+          dotnet-version: "5.0.x"
       - name: Publish Project
         run: dotnet publish MappingToolsWeb/MappingToolsWeb.csproj -c Release -o release --nologo
       - name: Change base-tag in index.html 
