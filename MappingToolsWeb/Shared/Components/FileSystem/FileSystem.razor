@@ -1,7 +1,8 @@
 ﻿@using MappingToolsWeb.IndexedDB
 
 @inject IContentTagManager ContentTagManager
-<div class="@Class">
+
+<div class="@CssClass file-system">
     <h3>Files</h3>
 
     <p>
@@ -18,7 +19,7 @@
 
 @code {
     [Parameter]
-    public string Class { get; set; }
+    public string CssClass { get; set; }
 
     protected FileTable _audioTable;
     protected FileTable _imageTable;

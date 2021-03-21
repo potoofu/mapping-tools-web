@@ -1,0 +1,11 @@
+﻿.nav-menu {
+    grid-area: navmenu;
+}
+
+.navbar-brand {
+    height: 100%;
+}
+
+    .navbar-brand img {
+        height: 100%;
+    }

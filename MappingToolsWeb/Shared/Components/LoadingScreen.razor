@@ -1,4 +1,11 @@
-﻿@inject NavigationManager NavManager
+﻿@using TG.Blazor.IndexedDB
+@using MappingToolsWeb.IndexedDB
+@using MappingToolsWeb.IndexedDB.Records
+@using MappingToolsWeb.IndexedDB.Records.Implementations
+
+@inject NavigationManager NavManager
+@inject IndexedDBManager IndexedDbMgr
+@inject IIndexedDbCache<ContentTag, IOrderedFileRecords, IFileRecord> IndexedDbCache
 
 @if (isLoaded)
 {
@@ -7,7 +14,7 @@
 else
 {
     <div class="centered loading-container">
-        <img style="width: 20vw; height: 20vh;" class="spinning-logo" src="@(NavManager.ToAbsoluteUri("/icons/mt_logo.svg"))" />
+        <img style="width: 20vw; height: 20vh;" class="spinning-logo" src="@(NavManager.BaseUri + "icons/mt_logo.svg")" />
     </div>
 }
 
@@ -19,7 +26,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(4000);
+        if(!IndexedDbCache.IsInitialized) {
+            var files = await IndexedDbMgr.GetRecords<FileRecord>("files");
+
+            IndexedDbCache.Initialize(files);
+
+            Console.WriteLine("Inidialized");
+        }
+        
         isLoaded = true;
     }
 }

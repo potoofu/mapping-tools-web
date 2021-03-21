@@ -5,6 +5,7 @@
 
 @inject IndexedDBManager IndexedDbMgr
 @inject IContentTagManager IContentTagManager
+@inject IIndexedDbCache<ContentTag, IOrderedFileRecords, IFileRecord> IndexedDbCache
 
 <div hidden="@(!ShowContent)">
     @if(Files.Count > 0) {
@@ -31,53 +32,69 @@
     [Parameter]
     public ContentTag Tag { get; set; } = ContentTag.Undefined;
 
-    public List<IFileRecord> Files { get; } = new List<IFileRecord>();
+    [Parameter]
+    public long MaxFileSize { get; set; } = 1024000000;
+
+    public List<IFileRecord> Files { get; private set; } = new List<IFileRecord>();
 
     private bool ShowContent { get; set; }
     private bool ShowLoader { get; set; } = true;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        var files = await IndexedDbMgr.GetRecords<FileRecord>("files");
+        IndexedDbCache.CacheHasChanged += OnCacheChanged;
 
-        foreach(var file in files) {
-            if(file.Tag == Tag) {
-                Files.Add(file);
-            }
+        if(IndexedDbCache.Cache.ContainsKey(Tag)) {
+            var cached = IndexedDbCache.Cache.GetValueOrDefault(Tag);
+
+            Files = cached.OrderedRecords;
         }
-
+        
         ShowContent = true;
         ShowLoader = false;
     }
 
-    
-
-    public async Task AddFileAsync(IBrowserFile file, long maxFileSize = 1024000000)
+    public async Task AddFileAsync(IBrowserFile file)
     {
         ShowContent = false;
         ShowLoader = true;
 
         StateHasChanged();
 
-        using var fileStream = file.OpenReadStream(maxFileSize);
-
-        var buffer = new byte[fileStream.Length];
-
-        await fileStream.ReadAsync(buffer);
-
-        var fileRecord = new FileRecord {
-            Name = file.Name,
-            Tag = Tag,
-            LastModified = DateTime.Now,
-            Data = buffer
-        };
+        var fileRecord = await ConvertBrowserFileToFileRecordAsync(file);
 
         await IndexedDbMgr.AddRecord(new StoreRecord<IFileRecord> {
             Storename = "files",
             Data = fileRecord
         });
 
-        Files.Add(fileRecord);
+        IndexedDbCache.Add(fileRecord);
+    }
+
+    private async Task<IFileRecord> ConvertBrowserFileToFileRecordAsync(IBrowserFile file) {
+        using var fileStream = file.OpenReadStream(MaxFileSize);
+
+        var buffer = new byte[fileStream.Length];
+
+        await fileStream.ReadAsync(buffer);
+
+       return new FileRecord {
+            Name = file.Name,
+            Tag = Tag,
+            LastModified = DateTime.Now,
+            Data = buffer
+        };
+    }
+
+    private void OnCacheChanged(object sender, EventArgs e) {
+        if(IndexedDbCache.Cache.ContainsKey(Tag)) {
+            var cached = IndexedDbCache.Cache.GetValueOrDefault(Tag);
+
+            Files = cached.OrderedRecords;
+        }
+        else {
+            Files.Clear();
+        }
 
         ShowLoader = false;
         ShowContent = true;

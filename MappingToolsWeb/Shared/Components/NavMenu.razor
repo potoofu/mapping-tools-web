@@ -1,22 +1,17 @@
 ﻿<style>
-    .navbar-brand {
-        height: 100%;
-    }
-
-    .navbar-brand img {
-        height: 100%;
-    }
+  
 </style>
 
-<nav class="navbar @Class" role="navigation">
+<nav class="@CssClass nav-menu" role="navigation">
   <div class="navbar-brand">
     <a class="navbar-item" href="/">
       <img src="icons/mt_logo.svg">
     </a>
   </div>
+  <a class="navbar-item" href="test">Test</a>
 </nav>
 
 @code {
     [Parameter]
-    public string Class { get; set; }
+    public string CssClass { get; set; }
 }

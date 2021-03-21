@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TG.Blazor.IndexedDB;
 using MappingToolsWeb.IndexedDB;
 using MappingToolsWeb.IndexedDB.Api;
+using MappingToolsWeb.IndexedDB.Records;
 
 namespace MappingToolsWeb {
 
@@ -42,6 +43,8 @@ namespace MappingToolsWeb {
             });
 
             builder.Services.AddSingleton<IContentTagManager>(sp => new ContentTagManager());
+
+            builder.Services.AddSingleton<IIndexedDbCache<ContentTag, IOrderedFileRecords, IFileRecord>>(sp => new IndexedDbCache());
         }
 
         private static async Task ConfigureServices(WebAssemblyHost host) {
