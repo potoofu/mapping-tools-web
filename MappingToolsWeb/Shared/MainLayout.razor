@@ -2,14 +2,28 @@
 
 @using MappingToolsWeb.Shared.Components
 @using MappingToolsWeb.Shared.Components.FileSystem
+<MatThemeProvider Theme="@dark_theme">
+    <div class="grid-container main-container">
+        <NavMenu />
+        <FileSystem />
+        <div class="body-content">@Body</div>
+    </div>
+</MatThemeProvider>
 
-<div class="grid-container main-container">
-    <NavMenu />
-    <FileSystem />
-    <div class="body-content">@Body</div>
-</div>
 
 @code {
+    MatTheme dark_theme = new MatTheme()
+    {
+        Primary = MatThemeColors.Orange._500.Value,
+        Secondary = MatThemeColors.BlueGrey._500.Value
+    };
+ 
+    MatTheme light_theme = new MatTheme()
+    {
+        Primary = "green",
+        Secondary = "orange"
+    };
+
     public string MainColor { get; } = "rgba(18, 18, 18, 1)";
     public string TextColor { get; } = "rgba(246, 247, 235, 1)";
 }
