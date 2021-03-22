@@ -1,44 +1,47 @@
 ﻿@using MappingToolsWeb.IndexedDB
 
 @inject IContentTagManager ContentTagManager
+    <InputFile id="fileInput" OnChange="OnFileInputChanged" hidden multiple />
 
-<div class="@CssClass file-system">
-    <h3>Files</h3>
+    <MudButton 
+        Style="min-height: 35px; max-height: 35px;"
+        Class="mb-3 mt-3"
+        HtmlTag="label"
+        Variant="Variant.Filled"
+        Color="Color.Secondary"
+        StartIcon="@Icons.Filled.FileUpload"
+        for="fileInput">Upload Files
+    </MudButton>
 
-    <p>
-        <InputFile class="test" OnChange="@OnInputFileChange" multiple />
-    </p>
-
-    <FileTable @ref="_audioTable" Name="Audio" Tag="ContentTag.Audio" />
-    <FileTable @ref="_imageTable" Name="Image" Tag="ContentTag.Image" />
-    <FileTable @ref="_beatmapTable" Name="Beatmap" Tag="ContentTag.OsuBeatmap" />
-    <FileTable @ref="_storyboardTable" Name="Storyboard" Tag="ContentTag.OsuStoryboard" />
-    <FileTable @ref="_videoTable" Name="Video" Tag="ContentTag.Video" />
-    <FileTable @ref="_undefinedTable" Name="Undefined" Tag="ContentTag.Undefined" />
-</div>
+    <FileTable @ref="_audioTable" Name="Audio" Tag="ContentTag.Audio" Icon="@Icons.Filled.Audiotrack" />
+    <FileTable @ref="_beatmapTable" Name="Beatmap" Tag="ContentTag.OsuBeatmap" Icon="@Icons.Filled.Map" />
+    <FileTable @ref="_imageTable" Name="Image" Tag="ContentTag.Image" Icon="@Icons.Filled.Image" />
+    <FileTable @ref="_storyboardTable" Name="Storyboard" Tag="ContentTag.OsuStoryboard" Icon="@Icons.Filled.Dashboard" />
+    <FileTable @ref="_videoTable" Name="Video" Tag="ContentTag.Video" Icon="@Icons.Filled.VideoLibrary" />
+    <FileTable @ref="_undefinedTable" Name="Undefined" Tag="ContentTag.Undefined" Icon="@Icons.Filled.SpaceBar" />
 
 @code {
     [Parameter]
     public string CssClass { get; set; }
 
-    protected FileTable _audioTable;
-    protected FileTable _imageTable;
-    protected FileTable _beatmapTable;
-    protected FileTable _storyboardTable;
-    protected FileTable _videoTable;
-    protected FileTable _undefinedTable;
+    FileTable _audioTable;
+    FileTable _imageTable;
+    FileTable _beatmapTable;
+    FileTable _storyboardTable;
+    FileTable _videoTable;
+    FileTable _undefinedTable;
 
-    protected async Task OnInputFileChange(InputFileChangeEventArgs e) {
-        var files = e.GetMultipleFiles();
+    async Task OnFileInputChanged(InputFileChangeEventArgs args) {
+        var files = args.GetMultipleFiles();
 
         foreach(var file in files) {
             var fileTable = GetFileTableByFileContent(file);
 
             await fileTable.AddFileAsync(file);
-        }  
+        }
     }
 
-    private FileTable GetFileTableByFileContent(IBrowserFile file) {
+    FileTable GetFileTableByFileContent(IBrowserFile file) {
         switch(ContentTagManager.GetContentTag(file.Name, file.ContentType)) {
             case ContentTag.Audio:
                 return _audioTable;

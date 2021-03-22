@@ -7,26 +7,21 @@
 @inject IContentTagManager IContentTagManager
 @inject IIndexedDbCache<ContentTag, IOrderedFileRecords, IFileRecord> IndexedDbCache
 
-<div hidden="@(!ShowContent)">
+<div class="@ContainerClass">
     @if(Files.Count > 0) {
-    <h3>@Name</h3>
-    
-    <ul class="file-table-list">
-        @foreach(var file in Files) {
-            <li>
-                <div class="file-table-list-container" title="@file.Name">
-                    @file.Name
-                </div>
-                <div>
-                    
-                </div>
-            </li>
-        }
-    </ul>
-}
+        <MudList Clickable="false" Dense="true">
+            <MudListItem Icon="@Icon" Text="@Name" InitiallyExpanded="false">
+                <NestedList>
+                    @foreach(var file in Files) {
+                        <MudListItem>@file.Name</MudListItem>
+                    }
+                </NestedList>
+            </MudListItem>
+        </MudList>
+    }
 </div>
 
-<p hidden="@(!ShowLoader)">Loading...</p>
+<MudProgressLinear Class="@ProgressBarClass" Color="Color.Secondary" Indeterminate="true" />
 
 @code {
     [Parameter]
@@ -38,10 +33,14 @@
     [Parameter]
     public long MaxFileSize { get; set; } = 1024000000;
 
-    public List<IFileRecord> Files { get; private set; } = new List<IFileRecord>();
+    [Parameter]
+    public string Icon { get; set; }
 
-    private bool ShowContent { get; set; }
-    private bool ShowLoader { get; set; } = true;
+    List<IFileRecord> Files { get; set; } = new List<IFileRecord>();
+
+    string ProgressBarClass = "d-none file-table-loader my-7";
+
+    string ContainerClass = "";
 
     protected override void OnInitialized()
     {
@@ -52,19 +51,16 @@
 
             Files = cached.OrderedRecords;
         }
-        
-        ShowContent = true;
-        ShowLoader = false;
     }
 
     public async Task AddFileAsync(IBrowserFile file)
     {
-        ShowContent = false;
-        ShowLoader = true;
+        ProgressBarClass = "file-table-loader my-7";
+        ContainerClass = "d-none";
 
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
 
-        var fileRecord = await ConvertBrowserFileToFileRecordAsync(file);
+        var fileRecord = await ConvertFileToFileRecordAsync(file);
 
         await IndexedDbMgr.AddRecord(new StoreRecord<IFileRecord> {
             Storename = "files",
@@ -74,14 +70,14 @@
         IndexedDbCache.Add(fileRecord);
     }
 
-    private async Task<IFileRecord> ConvertBrowserFileToFileRecordAsync(IBrowserFile file) {
+    private async Task<IFileRecord> ConvertFileToFileRecordAsync(IBrowserFile file) {
         using var fileStream = file.OpenReadStream(MaxFileSize);
 
         var buffer = new byte[fileStream.Length];
 
         await fileStream.ReadAsync(buffer);
 
-       return new FileRecord {
+        return new FileRecord {
             Name = file.Name,
             Tag = Tag,
             LastModified = DateTime.Now,
@@ -99,8 +95,8 @@
             Files.Clear();
         }
 
-        ShowLoader = false;
-        ShowContent = true;
+        ProgressBarClass = "d-none file-table-loader my-7";
+        ContainerClass = "";
 
         StateHasChanged();
     }

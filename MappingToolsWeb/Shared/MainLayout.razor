@@ -1,29 +1,133 @@
 ﻿@inherits LayoutComponentBase
 
-@using MappingToolsWeb.Shared.Components
+@using Blazored.LocalStorage
 @using MappingToolsWeb.Shared.Components.FileSystem
-<MatThemeProvider Theme="@dark_theme">
-    <div class="grid-container main-container">
-        <NavMenu />
-        <FileSystem />
-        <div class="body-content">@Body</div>
-    </div>
-</MatThemeProvider>
 
+@inject ILocalStorageService LocalStorage
+
+<MudThemeProvider Theme="@currentTheme"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudLink Href="/" Typo="Typo.subtitle1" Underline="Underline.None" Color="Color.Inherit">Documentation</MudLink>
+        <MudAppBarSpacer />
+        <MudIconButton Class="ma-0" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" OnClick="FilesToggleOpen" />
+    </MudAppBar>
+    <MudDrawer Variant="DrawerVariant.Persistent" Open="true" Elevation="2" Class="pa-3">
+        <a href="/" class="mud-drawer-header" style="padding: 0;">
+            <img width="80px" height="80px" src="icons/mt_logo.svg" style="margin-left: auto; margin-right: auto;" />
+        </a>
+        <MudText Style="text-align: center;" Class="mt-4" Typo="Typo.h5">Mapping Tools</MudText>
+        <div class="d-flex mb-4" style="justify-content: center;">
+            <MudIconButton Target="_Blank" Class="ma-0" Icon="@Icons.Custom.Brands.GitHub" Link="https://github.com/misakura-rin/mapping-tools-web" />
+            <MudToggleIconButton 
+                Class="ma-0"
+                Color="Color.Inherit"
+                ToggledColor="Color.Inherit"
+                Edge="Edge.End"
+                Toggled="@isLightTheme" 
+                ToggledChanged="ToggleTheme" 
+                Icon="@Icons.Material.Filled.NightlightRound"
+                ToggledIcon="@Icons.Material.Outlined.WbSunny">
+            </MudToggleIconButton>
+            <MudButton Target="_Blank" Link="https://discord.gg/YfjKN2yjQV">
+                <img style="width: 28px; height: 28px;" src="https://cdn3.iconfinder.com/data/icons/popular-services-brands-vol-2/512/discord-512.png" />
+            </MudButton>
+        </div>
+        <ToolMenu />
+    </MudDrawer>
+    <MudDrawer @bind-Open="filesOpen" Elevation="2" Anchor="Anchor.Right" ClipMode="DrawerClipMode.Always" Class="pa-3">
+        <FileSystem />
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer Class="pa-7">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
 
 @code {
-    MatTheme dark_theme = new MatTheme()
-    {
-        Primary = MatThemeColors.Orange._500.Value,
-        Secondary = MatThemeColors.BlueGrey._500.Value
-    };
- 
-    MatTheme light_theme = new MatTheme()
-    {
-        Primary = "green",
-        Secondary = "orange"
+    enum Theme {
+        Dark,
+        Light
+    }
+
+    bool toolsOpen = true;
+    bool filesOpen = true;
+
+    bool isLightTheme;
+
+    MudTheme currentTheme;
+
+    MudTheme darkTheme = new MudTheme {
+        Palette = new Palette {
+            Black = "#27272f",
+            Background = "#32333d",
+            BackgroundGrey = "#27272f",
+            Surface = "#373740",
+            DrawerBackground = "#27272f",
+            DrawerText = "rgba(255,255,255, 0.50)",
+            DrawerIcon = "rgba(255,255,255, 0.50)",
+            AppbarBackground = "#27272f",
+            AppbarText = "rgba(255,255,255, 0.70)",
+            TextPrimary = "rgba(255,255,255, 0.70)",
+            TextSecondary = "rgba(255,255,255, 0.50)",
+            ActionDefault = "#adadb1",
+            ActionDisabled = "rgba(255,255,255, 0.26)",
+            ActionDisabledBackground = "rgba(255,255,255, 0.12)"
+        }
     };
 
-    public string MainColor { get; } = "rgba(18, 18, 18, 1)";
-    public string TextColor { get; } = "rgba(246, 247, 235, 1)";
+    MudTheme lightTheme = new MudTheme {
+        Palette = new Palette() {
+            Black = "#272c34"
+        }
+    };
+
+    protected override async Task OnInitializedAsync() {
+        var theme = await LocalStorage.GetItemAsync<Theme>("theme");
+
+        switch(theme) {
+            case Theme.Dark:
+                SetDarkTheme();
+            break;
+            case Theme.Light:
+                SetLightTheme();
+            break;
+            default:
+                SetDarkTheme();
+            break;
+        }
+    }
+
+    async Task ToggleTheme(bool _) {
+        if(currentTheme == lightTheme) {
+            SetDarkTheme();
+            await LocalStorage.SetItemAsync<Theme>("theme", Theme.Dark);
+        }
+        else {
+            SetLightTheme();
+            await LocalStorage.SetItemAsync<Theme>("theme", Theme.Light);
+        }
+    }
+
+    void SetLightTheme() {
+        currentTheme = lightTheme;
+        isLightTheme = true;
+    }
+
+    void SetDarkTheme() {
+        currentTheme = darkTheme;
+        isLightTheme = false;
+    }
+
+    void ToolsToggleOpen() {
+        toolsOpen = !toolsOpen;
+    }
+
+    void FilesToggleOpen() {
+        filesOpen = !filesOpen;
+    }
 }

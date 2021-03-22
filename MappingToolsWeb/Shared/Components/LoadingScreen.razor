@@ -28,10 +28,7 @@ else
     {
         if(!IndexedDbCache.IsInitialized) {
             var files = await IndexedDbMgr.GetRecords<FileRecord>("files");
-
             IndexedDbCache.Initialize(files);
-
-            Console.WriteLine("Inidialized");
         }
         
         isLoaded = true;

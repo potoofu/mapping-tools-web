@@ -1,6 +1,7 @@
 ﻿using MappingToolsWeb.IndexedDB.Records;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MappingToolsWeb.IndexedDB.Api {
 
@@ -27,7 +28,7 @@ namespace MappingToolsWeb.IndexedDB.Api {
                 Cache.Add(record.Tag, orderedRecords);
             }
 
-            CacheHasChanged?.Invoke(this, null);
+            InvokeChange();
         }
 
         public void Add(IEnumerable<IFileRecord> records) {
@@ -47,7 +48,7 @@ namespace MappingToolsWeb.IndexedDB.Api {
                 orderedFileRecords.Order();
             }
 
-            CacheHasChanged?.Invoke(this, null);
+            InvokeChange();
         }
 
         public void Remove(IFileRecord record) {
@@ -61,7 +62,7 @@ namespace MappingToolsWeb.IndexedDB.Api {
                 }
             }
 
-            CacheHasChanged?.Invoke(this, null);
+            InvokeChange();
         }
 
         public void Remove(IEnumerable<IFileRecord> records) {
@@ -80,6 +81,10 @@ namespace MappingToolsWeb.IndexedDB.Api {
                 orderedFileRecords.Order();
             }
 
+            InvokeChange();
+        }
+
+        private void InvokeChange() {
             CacheHasChanged?.Invoke(this, null);
         }
     }
