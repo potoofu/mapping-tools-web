@@ -1,8 +1,10 @@
 ﻿@inherits LayoutComponentBase
 
 @using MappingToolsWeb.Shared.Components.FileSystem
+@using MappingToolsWeb.Classes.Models
 
 @inject ILocalStorageService LocalStorage
+@inject List<ChangelogModel> Changelogs
 
 <MudThemeProvider Theme="@currentTheme"/>
 <MudDialogProvider/>
@@ -22,6 +24,7 @@
         <a href="" class="mud-drawer-header" style="padding: 0;">
             <img width="100px" height="100px" src="icons/mt_logo.svg" style="margin-left: auto; margin-right: auto;" />
         </a>
+        <MudText Typo="Typo.caption" Align="Align.Center">@GetVersion()</MudText>
         <div class="d-flex mb-4" style="justify-content: center;">
             <MudToggleIconButton 
                 Class="ma-0"
@@ -141,5 +144,15 @@
 
     async Task OnLanguageClicked() {
         await languageMessage.Show();
+    }
+
+    string GetVersion() {
+        var first = Changelogs.FirstOrDefault();
+
+        if(first == null) {
+            return "0.0.0";
+        }
+
+        return first.TagName;
     }
 }
