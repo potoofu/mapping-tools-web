@@ -5,6 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AKSoftware.Localization.MultiLanguages" Version="5.0.0" />
+    <PackageReference Include="AKSoftware.Localization.MultiLanguages.Blazor" Version="1.0.0" />
     <PackageReference Include="Blazored.LocalStorage" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.4" PrivateAssets="all" />
@@ -15,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MappingToolsWeb.IndexedDB\MappingToolsWeb.IndexedDB.csproj" />
+    <ProjectReference Include="..\MappingToolsWeb.Localization\MappingToolsWeb.Localization.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,21 +32,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\favicon.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\fonts\ShipporiMinchoB1-Bold.ttf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\fonts\ShipporiMinchoB1-ExtraBold.ttf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\fonts\ShipporiMinchoB1-Medium.ttf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\fonts\ShipporiMinchoB1-Regular.ttf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\fonts\ShipporiMinchoB1-SemiBold.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\icons\mt_logo.svg">

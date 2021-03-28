@@ -1,0 +1,28 @@
+﻿@using System.Globalization
+
+@inject ILanguageContainerService LanguageService
+@inject ILocalizer Localizer
+@inject ILocalStorageService LocalStorage
+
+<MudSelect Dense="true" Class="mt-0" SelectedValues="selected" T="CultureInfo" ValueChanged="OnLanguageChanged">
+    @foreach(var locale in Localizer.SupportedCultures) {
+        <MudSelectItem Value="locale">@locale.DisplayName</MudSelectItem>
+    }
+</MudSelect>
+
+@code {
+    HashSet<CultureInfo> selected;
+
+    protected override void OnInitialized() {
+        selected = new HashSet<CultureInfo> { LanguageService.CurrentCulture };
+    }
+
+    async Task OnLanguageChanged(CultureInfo value) {
+        LanguageService.SetLanguage(value);
+
+        await LocalStorage.SetItemAsync("language", value.Name);
+        selected = new HashSet<CultureInfo> { value };
+
+        StateHasChanged();
+    }
+}

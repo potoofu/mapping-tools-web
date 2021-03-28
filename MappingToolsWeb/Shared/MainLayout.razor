@@ -1,6 +1,5 @@
 ﻿@inherits LayoutComponentBase
 
-@using Blazored.LocalStorage
 @using MappingToolsWeb.Shared.Components.FileSystem
 
 @inject ILocalStorageService LocalStorage
@@ -11,30 +10,31 @@
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudLink Href="/" Typo="Typo.subtitle1" Underline="Underline.None" Color="Color.Inherit">Documentation</MudLink>
+        <MudLink Href="/" Typo="Typo.h5" Class="mr-16" Color="Color.Inherit" Underline="Underline.None">Mapping Tools Web</MudLink>
+        <MudLink Href="https://misakura-rin.github.io/mapping-tools-web-docs/" Typo="Typo.subtitle1" Underline="Underline.None" Color="Color.Inherit" Class="mr-10">Documentation</MudLink>
+        <MudLink Href="changelog/" Typo="Typo.subtitle1" Color="Color.Inherit" Underline="Underline.None" Class="mr-10">Changelog</MudLink>
         <MudAppBarSpacer />
+        <MudIconButton Color="Color.Inherit" Target="_Blank" Class="ma-0" Icon="fab fa-discord" Link="https://discord.gg/YfjKN2yjQV" />
+        <MudIconButton Color="Color.Inherit" Target="_Blank" Class="ma-0" Icon="@Icons.Custom.Brands.GitHub" Link="https://github.com/misakura-rin/mapping-tools-web" />
         <MudIconButton Class="ma-0" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" OnClick="FilesToggleOpen" />
     </MudAppBar>
     <MudDrawer Variant="DrawerVariant.Persistent" Open="true" Elevation="2" Class="pa-3">
-        <a href="/" class="mud-drawer-header" style="padding: 0;">
-            <img width="80px" height="80px" src="icons/mt_logo.svg" style="margin-left: auto; margin-right: auto;" />
+        <a href="" class="mud-drawer-header" style="padding: 0;">
+            <img width="100px" height="100px" src="icons/mt_logo.svg" style="margin-left: auto; margin-right: auto;" />
         </a>
-        <MudText Style="text-align: center;" Class="mt-4" Typo="Typo.h5">Mapping Tools</MudText>
         <div class="d-flex mb-4" style="justify-content: center;">
-            <MudIconButton Target="_Blank" Class="ma-0" Icon="@Icons.Custom.Brands.GitHub" Link="https://github.com/misakura-rin/mapping-tools-web" />
             <MudToggleIconButton 
                 Class="ma-0"
-                Color="Color.Inherit"
+                Color="Color.Primary"
                 ToggledColor="Color.Inherit"
-                Edge="Edge.End"
+                Edge="Edge.Start"
                 Toggled="@isLightTheme" 
                 ToggledChanged="ToggleTheme" 
                 Icon="@Icons.Material.Filled.NightlightRound"
                 ToggledIcon="@Icons.Material.Outlined.WbSunny">
             </MudToggleIconButton>
-            <MudButton Target="_Blank" Link="https://discord.gg/YfjKN2yjQV">
-                <img style="width: 28px; height: 28px;" src="https://cdn3.iconfinder.com/data/icons/popular-services-brands-vol-2/512/discord-512.png" />
-            </MudButton>
+            <MudIconButton Color="Color.Primary" Class="ma-0" Icon="@Icons.Filled.Translate" OnClick="OnLanguageClicked"></MudIconButton>
+            <MudIconButton Color="Color.Primary" Class="ma-0" Icon="@Icons.Filled.Settings" Link="settings/"></MudIconButton>
         </div>
         <ToolMenu />
     </MudDrawer>
@@ -42,17 +42,25 @@
         <FileSystem />
     </MudDrawer>
     <MudMainContent>
-        <MudContainer Class="pa-7">
+        <MudContainer Class="py-10">
             @Body
         </MudContainer>
     </MudMainContent>
 </MudLayout>
+
+<MudMessageBox @ref="languageMessage" Title="Change language" >
+    <MessageContent>
+        <LanguageSelector />
+    </MessageContent>
+</MudMessageBox>
 
 @code {
     enum Theme {
         Dark,
         Light
     }
+
+    MudMessageBox languageMessage;
 
     bool toolsOpen = true;
     bool filesOpen = true;
@@ -129,5 +137,9 @@
 
     void FilesToggleOpen() {
         filesOpen = !filesOpen;
+    }
+
+    async Task OnLanguageClicked() {
+        await languageMessage.Show();
     }
 }

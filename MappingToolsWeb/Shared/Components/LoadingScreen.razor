@@ -1,11 +1,15 @@
-﻿@using TG.Blazor.IndexedDB
+﻿@using System.Globalization
+@using TG.Blazor.IndexedDB
 @using MappingToolsWeb.IndexedDB
 @using MappingToolsWeb.IndexedDB.Records
 @using MappingToolsWeb.IndexedDB.Records.Implementations
 
+@inject ILocalStorageService LocalStorage
 @inject NavigationManager NavManager
 @inject IndexedDBManager IndexedDbMgr
 @inject IIndexedDbCache<ContentTag, IOrderedFileRecords, IFileRecord> IndexedDbCache
+@inject ILocalizer Localizer
+@inject ILanguageContainerService LanguageService
 
 @if (isLoaded)
 {
@@ -29,6 +33,16 @@ else
         if(!IndexedDbCache.IsInitialized) {
             var files = await IndexedDbMgr.GetRecords<FileRecord>("files");
             IndexedDbCache.Initialize(files);
+        }
+
+        var lang = await LocalStorage.GetItemAsync<string>("language");
+
+        if(!string.IsNullOrWhiteSpace(lang)) {
+            var culture = CultureInfo.CreateSpecificCulture(lang);
+
+            if(Localizer.SupportedCultures.Contains(culture)) {
+                LanguageService.SetLanguage(culture);
+            }
         }
         
         isLoaded = true;

@@ -21,5 +21,7 @@ namespace MappingToolsWeb.IndexedDB {
         void Remove(TData data);
 
         void Remove(IEnumerable<TData> data);
+
+        void Replace(TData data);
     }
 }

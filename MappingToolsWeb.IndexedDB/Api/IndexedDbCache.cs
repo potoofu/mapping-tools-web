@@ -84,6 +84,17 @@ namespace MappingToolsWeb.IndexedDB.Api {
             InvokeChange();
         }
 
+        public void Replace(IFileRecord record) {
+            if( !Cache.ContainsKey(record.Tag) ) {
+                return;
+            }
+
+            var orderedCacheRecords = Cache.GetValueOrDefault(record.Tag);
+            orderedCacheRecords.Replace(record);
+
+            InvokeChange();
+        }
+
         private void InvokeChange() {
             CacheHasChanged?.Invoke(this, null);
         }

@@ -1,14 +1,19 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Reflection;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TG.Blazor.IndexedDB;
 using MappingToolsWeb.IndexedDB;
 using MappingToolsWeb.IndexedDB.Api;
 using MappingToolsWeb.IndexedDB.Records;
+using MappingToolsWeb.Localization;
+using MappingToolsWeb.Localization.Api;
 using MudBlazor.Services;
 using Blazored.LocalStorage;
+using AKSoftware.Localization.MultiLanguages;
+using System.Linq;
 
 namespace MappingToolsWeb {
 
@@ -22,7 +27,7 @@ namespace MappingToolsWeb {
 
             var host = builder.Build();
 
-            await ConfigureServices(host);
+            ConfigureServices(host);
 
             await host.RunAsync();
         }
@@ -51,9 +56,15 @@ namespace MappingToolsWeb {
             builder.Services.AddSingleton<IIndexedDbCache<ContentTag, IOrderedFileRecords, IFileRecord>>(sp => new IndexedDbCache());
 
             builder.Services.AddMudServices();
+
+            var localizationAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.FullName.StartsWith("MappingToolsWeb.Localization"));
+
+            builder.Services.AddLanguageContainer(localizationAssembly, new Localizer().DefaultCulture);
+
+            builder.Services.AddSingleton<ILocalizer>(new Localizer());
         }
 
-        private static async Task ConfigureServices(WebAssemblyHost host) {
+        private static void ConfigureServices(WebAssemblyHost host) {
         }
     }
 }

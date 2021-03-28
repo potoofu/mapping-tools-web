@@ -68,6 +68,18 @@ namespace MappingToolsWeb.IndexedDB.Api {
             }
         }
 
+        public void Replace(IFileRecord record, bool order = true) {
+            var index = _records.IndexOf(record);
+
+            if( index >= 0 ) {
+                _records[index] = record;
+            }
+
+            if( order ) {
+                Order();
+            }
+        }
+
         public void Order() {
             if( _ascending ) {
                 OrderedRecords = ( _orderedby switch {

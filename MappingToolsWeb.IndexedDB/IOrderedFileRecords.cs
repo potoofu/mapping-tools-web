@@ -15,6 +15,8 @@ namespace MappingToolsWeb.IndexedDB {
 
         void Remove(IEnumerable<IFileRecord> records, bool order = true);
 
+        void Replace(IFileRecord record, bool order = true);
+
         void Order();
     }
 }
