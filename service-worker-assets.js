@@ -6833,7 +6833,7 @@
       "url": "icons\/mt_logo.svg"
     },
     {
-      "hash": "sha256-vcz6YTVg8xcVIe+hvWm03dqbxKo9JRp9hk5HXQXShk0=",
+      "hash": "sha256-NEE9VFZrYwZTEx4y67d6N6Cit6gKizgXgX+WtMV+6KQ=",
       "url": "index.html"
     },
     {
