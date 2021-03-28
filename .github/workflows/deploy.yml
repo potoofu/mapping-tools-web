@@ -59,6 +59,11 @@ jobs:
           repo: mapping-tools-web
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: generate release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
       - name: create releases.json
         run: |
           cat >releases.json <<- EOF
@@ -68,14 +73,9 @@ jobs:
         run: |
           mkdir release/wwwroot/data
           cp releases.json release/wwwroot/data/changelog.json
-      - name: Commit to GitHub Pages
+      - name: commit to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
           FOLDER: release/wwwroot
-      - name: generate release
-        uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
