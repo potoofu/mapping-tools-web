@@ -67,9 +67,16 @@ namespace MappingToolsWeb {
 
             builder.Services.AddSingleton<ILocalizer>(new Localizer());
 
-            var changelog = await httpClient.GetFromJsonAsync<List<ChangelogModel>>("data/changelog.json");
+            try {
+                var changelog = await httpClient.GetFromJsonAsync<List<ChangelogModel>>("data/changelog.json");
+                builder.Services.AddSingleton(changelog);
 
-            builder.Services.AddSingleton(changelog);
+            }
+            catch(Exception) {
+                builder.Services.AddSingleton(new List<ChangelogModel>());
+
+            }
+
         }
 
         private static void ConfigureServices(WebAssemblyHost host) {
