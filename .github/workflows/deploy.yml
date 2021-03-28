@@ -48,7 +48,7 @@ jobs:
           echo -n "$jsFile" > service-worker-assets.js
       - name: copy index.html to 404.html
         run: cp release/wwwroot/index.html release/wwwroot/404.html
-      - name: create releases.json from github api
+      - name: get releases from github api
         uses: octokit/request-action@v2.x
         id: get_releases
         with:
@@ -57,12 +57,14 @@ jobs:
           repo: mapping-tools-web
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: |
+      - name: create releases.json
+        run: |
           cat >releases.json <<- EOF
           ${{ steps.get_releases.outputs.data }}
           EOF
       - name: copy releases.json to release folder
         run: |
+          mkdir release/wwwroot/data
           cp releases.json release/wwwroot/data/changelog.json
       - name: Commit to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.7.1
