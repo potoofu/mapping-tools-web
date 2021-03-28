@@ -2,6 +2,9 @@ name: Deploy
 on:
   push:
     branches: [ master ]
+    tags:
+      - "v*"
+      
 jobs:
   deploy-to-github-pages:
     runs-on: ubuntu-latest
@@ -72,3 +75,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
           FOLDER: release/wwwroot
+      - name: generate release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
