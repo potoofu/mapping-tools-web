@@ -1,0 +1,17 @@
+name: Test
+on: 
+  pull_request
+  
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT : true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "5.0.x"
+      - name: Publish Project
+        run: dotnet test MappingToolsWeb/MappingToolsWeb.csproj --nologo
