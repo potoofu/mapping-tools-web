@@ -6901,6 +6901,10 @@
       "url": "_framework\/Blazored.LocalStorage.dll"
     },
     {
+      "hash": "sha256-ljzM0Rfe7bpMz6TchxdKTn+AWvcns0IGvYEtSJkE71Q=",
+      "url": "_framework\/Markdig.dll"
+    },
+    {
       "hash": "sha256-rJmwfWf7998cj7fW6HgQu3oEFnaoCimGgH5Y1jYZBX8=",
       "url": "_framework\/Microsoft.AspNetCore.Components.dll"
     },
@@ -6989,7 +6993,7 @@
       "url": "_framework\/MappingToolsWeb.Localization.dll"
     },
     {
-      "hash": "sha256-1Cev4crMvcjjkWzu5LtE25+2JMlpZBAF0hVd6Nfw5k8=",
+      "hash": "sha256-gBDPwXYpS8gg9FOifJJkihTRMdckO8Cdo0vy3AKu\/Is=",
       "url": "_framework\/MappingToolsWeb.dll"
     },
     {
@@ -7033,7 +7037,7 @@
       "url": "_framework\/System.ComponentModel.dll"
     },
     {
-      "hash": "sha256-UF8mv3VLUx1e7B0SmDn78lXTnx2a0MfrJHh5iZwBlBc=",
+      "hash": "sha256-WtwGpDeOHHQ3HoP5qxu\/A1kRPa3\/d5xpNfZGzIby4AM=",
       "url": "_framework\/System.Console.dll"
     },
     {
@@ -7085,7 +7089,7 @@
       "url": "_framework\/System.Private.Runtime.InteropServices.JavaScript.dll"
     },
     {
-      "hash": "sha256-A8MaI8XsBzMCi6V\/EwPR\/BbvLR0\/IfCEo5AKzv80PaU=",
+      "hash": "sha256-D4mLE6QgLlA351dl0vKmoupyGbV6id6pJH6JjJDuLro=",
       "url": "_framework\/System.Private.Uri.dll"
     },
     {
@@ -7097,7 +7101,7 @@
       "url": "_framework\/System.Private.Xml.dll"
     },
     {
-      "hash": "sha256-uSVkVaanFhPf\/d3N\/uQmarPuAWFqftuCZ5oRd+tBops=",
+      "hash": "sha256-D8xYcJokC+hsIVpkpyF\/Y9kg9S46g\/0dDhkV5qOkmOE=",
       "url": "_framework\/System.Runtime.CompilerServices.Unsafe.dll"
     },
     {
@@ -7133,11 +7137,11 @@
       "url": "_framework\/System.Text.RegularExpressions.dll"
     },
     {
-      "hash": "sha256-o5AfUSDDqre+93e5XnEmBoP7jLjCPdbQLJyLd4Zj0yA=",
+      "hash": "sha256-tAT5eLeuIke+xD6HJOkwvlskKwhRY\/VOybS3SVQhpg0=",
       "url": "_framework\/System.Private.CoreLib.dll"
     },
     {
-      "hash": "sha256-gaCK95jZBrkrHjOfJCaDcS\/dwH9CrEUQ5eoSCGOUuzI=",
+      "hash": "sha256-WNqbN8cXN25e3keIE2ovRho80I4y0eUHOeUQbXu+tGA=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -7145,5 +7149,5 @@
       "url": "_framework\/blazor.webassembly.js"
     }
   ],
-  "version": "9gHgJzR4"
+  "version": "DvZaVqRM"
 };

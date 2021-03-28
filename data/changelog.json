@@ -1,1 +1,41 @@
-[]
+[
+  {
+    "url": "https://api.github.com/repos/misakura-rin/mapping-tools-web/releases/40607155",
+    "assets_url": "https://api.github.com/repos/misakura-rin/mapping-tools-web/releases/40607155/assets",
+    "upload_url": "https://uploads.github.com/repos/misakura-rin/mapping-tools-web/releases/40607155/assets{?name,label}",
+    "html_url": "https://github.com/misakura-rin/mapping-tools-web/releases/tag/v0.0.2",
+    "id": 40607155,
+    "author": {
+      "login": "github-actions[bot]",
+      "id": 41898282,
+      "node_id": "MDM6Qm90NDE4OTgyODI=",
+      "avatar_url": "https://avatars.githubusercontent.com/in/15368?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/github-actions%5Bbot%5D",
+      "html_url": "https://github.com/apps/github-actions",
+      "followers_url": "https://api.github.com/users/github-actions%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/github-actions%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/github-actions%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/github-actions%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/github-actions%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/github-actions%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/github-actions%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/github-actions%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/github-actions%5Bbot%5D/received_events",
+      "type": "Bot",
+      "site_admin": false
+    },
+    "node_id": "MDc6UmVsZWFzZTQwNjA3MTU1",
+    "tag_name": "v0.0.2",
+    "target_commitish": "master",
+    "name": "v0.0.2",
+    "draft": false,
+    "prerelease": false,
+    "created_at": "2021-03-28T22:46:06Z",
+    "published_at": "2021-03-28T22:51:07Z",
+    "assets": [],
+    "tarball_url": "https://api.github.com/repos/misakura-rin/mapping-tools-web/tarball/v0.0.2",
+    "zipball_url": "https://api.github.com/repos/misakura-rin/mapping-tools-web/zipball/v0.0.2",
+    "body": "## Commits\n- [[d504cf4](https://github.com/misakura-rin/mapping-tools-web/commit/d504cf459df8ec8e26e545369598d489939813cc)]: Do not let app crash when changelog is missing (Potoofu)\n- [[d047dcb](https://github.com/misakura-rin/mapping-tools-web/commit/d047dcb214b661fe7840a219af32b606a348995c)]: Bump localization project to net5.0 (Potoofu)"
+  }
+]
