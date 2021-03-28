@@ -63,7 +63,7 @@ jobs:
           EOF
       - name: copy releases.json to release folder
         run: |
-          cp releases.json release/wwwroot/data
+          cp releases.json release/wwwroot/data/changelog.json
       - name: Commit to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
