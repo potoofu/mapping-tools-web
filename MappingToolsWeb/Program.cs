@@ -74,9 +74,7 @@ namespace MappingToolsWeb {
             }
             catch(Exception) {
                 builder.Services.AddSingleton(new List<ChangelogModel>());
-
             }
-
         }
 
         private static void ConfigureServices(WebAssemblyHost host) {
