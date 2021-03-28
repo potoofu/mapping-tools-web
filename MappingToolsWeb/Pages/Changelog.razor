@@ -1,7 +1,25 @@
 ﻿@page "/changelog"
 
-<h3>Releases</h3>
+@using MappingToolsWeb.Classes.Models
 
-@code {
+@inject List<ChangelogModel> Changelogs
 
-}
+<MudText Typo="Typo.h5">Changelog</MudText>
+
+<MudList>
+    @foreach(var log in Changelogs) {
+        <MudListItem>
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">@log.TagName @log.Name</MudText>
+                    <MudText Typo="Typo.caption">@log.PublishedAt</MudText>
+                    <MudText Class="mt-5">@((MarkupString) log.Body.Replace("\n", "<br/>"))</MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudLink Color="Color.Primary" Underline="Underline.None" Target="_Blank" Href="@log.Url">Learn more</MudLink>
+                </MudCardActions>
+            </MudCard>
+        </MudListItem>
+    }
+</MudList>
+
