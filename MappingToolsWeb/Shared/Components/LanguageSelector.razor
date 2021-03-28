@@ -6,7 +6,7 @@
 
 <MudSelect Dense="true" Class="mt-0" SelectedValues="selected" T="CultureInfo" ValueChanged="OnLanguageChanged">
     @foreach(var locale in Localizer.SupportedCultures) {
-        <MudSelectItem Value="locale">@locale.DisplayName</MudSelectItem>
+        <MudSelectItem Value="locale">@locale.NativeName</MudSelectItem>
     }
 </MudSelect>
 
