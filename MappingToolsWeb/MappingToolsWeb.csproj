@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Localization1\MappingToolsWeb.Localization.csproj" />
     <ProjectReference Include="..\MappingToolsWeb.IndexedDB\MappingToolsWeb.IndexedDB.csproj" />
+    <ProjectReference Include="..\MappingToolsWeb.Localization\MappingToolsWeb.Localization.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,9 +46,5 @@
     <None Update="Shared\Components\LoadingScreen.razor.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\data\" />
   </ItemGroup>
 </Project>
