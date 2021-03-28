@@ -1,6 +1,7 @@
 ﻿@page "/changelog"
 
 @using MappingToolsWeb.Classes.Models
+@using Markdig
 
 @inject List<ChangelogModel> Changelogs
 
@@ -13,7 +14,7 @@
                 <MudCardContent>
                     <MudText Typo="Typo.h6">@log.TagName @log.Name</MudText>
                     <MudText Typo="Typo.caption">@log.PublishedAt</MudText>
-                    <MudText Class="mt-5">@((MarkupString) log.Body.Replace("\n", "<br/>"))</MudText>
+                    <MudText Class="mt-5">@(Markdig.Markdown.ToHtml(log.Body))</MudText>
                 </MudCardContent>
                 <MudCardActions>
                     <MudLink Color="Color.Primary" Underline="Underline.None" Target="_Blank" Href="@log.Url">Learn more</MudLink>
@@ -22,4 +23,3 @@
         </MudListItem>
     }
 </MudList>
-
