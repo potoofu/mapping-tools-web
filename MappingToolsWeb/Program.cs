@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Reflection;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TG.Blazor.IndexedDB;
@@ -14,6 +13,9 @@ using MudBlazor.Services;
 using Blazored.LocalStorage;
 using AKSoftware.Localization.MultiLanguages;
 using System.Linq;
+using System.Net.Http.Json;
+using System.Collections.Generic;
+using MappingToolsWeb.Classes.Models;
 
 namespace MappingToolsWeb {
 
@@ -23,7 +25,7 @@ namespace MappingToolsWeb {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
 
-            LoadServices(builder);
+            await LoadServices(builder);
 
             var host = builder.Build();
 
@@ -32,8 +34,10 @@ namespace MappingToolsWeb {
             await host.RunAsync();
         }
 
-        private static void LoadServices(WebAssemblyHostBuilder builder) {
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+        private static async Task LoadServices(WebAssemblyHostBuilder builder) {
+            var httpClient = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
+
+            builder.Services.AddScoped(sp => httpClient);
 
             builder.Services.AddIndexedDB(store => {
                 store.DbName = "MappingToolsWebDb";
@@ -62,6 +66,10 @@ namespace MappingToolsWeb {
             builder.Services.AddLanguageContainer(localizationAssembly, new Localizer().DefaultCulture);
 
             builder.Services.AddSingleton<ILocalizer>(new Localizer());
+
+            var changelog = await httpClient.GetFromJsonAsync<List<ChangelogModel>>("data/changelog.json");
+
+            builder.Services.AddSingleton(changelog);
         }
 
         private static void ConfigureServices(WebAssemblyHost host) {
