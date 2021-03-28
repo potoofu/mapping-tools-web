@@ -6833,7 +6833,7 @@
       "url": "icons\/mt_logo.svg"
     },
     {
-      "hash": "sha256-NEE9VFZrYwZTEx4y67d6N6Cit6gKizgXgX+WtMV+6KQ=",
+      "hash": "sha256-vcz6YTVg8xcVIe+hvWm03dqbxKo9JRp9hk5HXQXShk0=",
       "url": "index.html"
     },
     {
@@ -6985,11 +6985,11 @@
       "url": "_framework\/MappingToolsWeb.IndexedDB.dll"
     },
     {
-      "hash": "sha256-BPDsTcOb9fXaQhXzHjGijpKBUKn7MvbjvgjYP9TM7w4=",
+      "hash": "sha256-IUw9tAgTkqxnqYw4B0moS8qsGTqoJhQHECZlHN62tRQ=",
       "url": "_framework\/MappingToolsWeb.Localization.dll"
     },
     {
-      "hash": "sha256-UAI3QA+x5XybUmEwTLCTn7uvP3sJVxF9DCd6IHI0jJc=",
+      "hash": "sha256-1Cev4crMvcjjkWzu5LtE25+2JMlpZBAF0hVd6Nfw5k8=",
       "url": "_framework\/MappingToolsWeb.dll"
     },
     {
@@ -7137,7 +7137,7 @@
       "url": "_framework\/System.Private.CoreLib.dll"
     },
     {
-      "hash": "sha256-n5tKaqSYQEkYtmBGbtiXsNG\/5FMzNQFg\/HAU0rXO3+0=",
+      "hash": "sha256-gaCK95jZBrkrHjOfJCaDcS\/dwH9CrEUQ5eoSCGOUuzI=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -7145,5 +7145,5 @@
       "url": "_framework\/blazor.webassembly.js"
     }
   ],
-  "version": "MUfm1SNA"
+  "version": "9gHgJzR4"
 };
