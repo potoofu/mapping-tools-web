@@ -68,11 +68,10 @@ namespace MappingToolsWeb {
             builder.Services.AddSingleton<ILocalizer>(new Localizer());
 
             try {
-                var changelog = await httpClient.GetFromJsonAsync<List<ChangelogModel>>("data/changelog.json");
+                var changelog = await httpClient.GetFromJsonAsync<List<ChangelogModel>>("https://api.github.com/repos/misakura-rin/mapping-tools-web/releases");
                 builder.Services.AddSingleton(changelog);
-
             }
-            catch(Exception) {
+            catch( Exception ) {
                 builder.Services.AddSingleton(new List<ChangelogModel>());
             }
         }

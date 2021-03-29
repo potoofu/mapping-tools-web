@@ -11,71 +11,30 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT : true
     steps:
       - uses: actions/checkout@v2
+
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "5.0.x"
+
       - name: Publish Project
         run: dotnet publish MappingToolsWeb/MappingToolsWeb.csproj -c Release -o release --nologo
+
       - name: Change base-tag in index.html 
         run: sed -i 's/<base href="\/" \/>/<base href="\/mapping-tools-web\/" \/>/g' release/wwwroot/index.html
-      - name: Fix service-worker-assets.js hashes
-        working-directory: release/wwwroot
-        run: |
-          jsFile=$(<service-worker-assets.js)
-          # remove JavaScript from contents so it can be interpreted as JSON
-          json=$(echo "$jsFile" | sed "s/self.assetsManifest = //g" | sed "s/;//g")
-          # grab the assets JSON array
-          assets=$(echo "$json" | jq '.assets[]' -c)
-          for asset in $assets
-          do
-            oldHash=$(echo "$asset" | jq '.hash')
-            #remove leading and trailing quotes
-            oldHash="${oldHash:1:-1}"
-            path=$(echo "$asset" | jq '.url')
-            #remove leading and trailing quotes
-            path="${path:1:-1}"
-            newHash="sha256-$(openssl dgst -sha256 -binary $path | openssl base64 -A)"
 
-            if [ $oldHash != $newHash ]; then
-              # escape slashes for json
-              oldHash=$(echo "$oldHash" | sed 's;/;\\/;g')
-              newHash=$(echo "$newHash" | sed 's;/;\\/;g')
-              echo "Updating hash for $path from $oldHash to $newHash"
-              # escape slashes second time for sed
-              oldHash=$(echo "$oldHash" | sed 's;/;\\/;g')
-              jsFile=$(echo -n "$jsFile" | sed "s;$oldHash;$newHash;g")
-            fi
-          done
-          echo -n "$jsFile" > service-worker-assets.js
       - name: copy index.html to 404.html
         run: cp release/wwwroot/index.html release/wwwroot/404.html
-      - name: get releases from github api
-        uses: octokit/request-action@v2.x
-        id: get_releases
-        with:
-          route: GET /repos/{owner}/{repo}/releases
-          owner: misakura-rin
-          repo: mapping-tools-web
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: generate release
-        uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-      - name: create releases.json
-        run: |
-          cat >releases.json <<- EOF
-          ${{ steps.get_releases.outputs.data }}
-          EOF
-      - name: copy releases.json to release folder
-        run: |
-          mkdir release/wwwroot/data
-          cp releases.json release/wwwroot/data/changelog.json
+
       - name: commit to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
           FOLDER: release/wwwroot
+          
+      - name: generate release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
