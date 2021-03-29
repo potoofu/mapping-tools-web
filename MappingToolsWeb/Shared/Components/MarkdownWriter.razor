@@ -1,0 +1,56 @@
+@using Markdig
+
+@inject HttpClient Http
+
+@if(isError) {
+    <MudText Typo="Typo.subtitle1">Could not find any documentation for this tool.</MudText>
+}
+else {
+    <div>@content</div>
+}
+
+@code {
+    [Parameter]
+    public string Path {get; set;}
+
+    MarkupString content;
+    bool isError;
+
+    protected override async Task OnInitializedAsync() {
+        await InitMarkdown();
+    }
+
+    async Task InitMarkdown() {
+        if(string.IsNullOrWhiteSpace(Path)) {
+            isError = true;
+            return;
+        }
+
+        try {
+            var doc = await Http.GetStringAsync(Path);
+            
+            if(!TryGenerateHtml(doc, out var markup)) {
+                Console.WriteLine("markdown process error");
+                isError = true;
+                return;
+            }
+
+            content = markup;
+        }
+        catch( Exception ) {
+            isError = true;
+        }
+    }
+
+    bool TryGenerateHtml(string s, out MarkupString markup) {
+        markup = new MarkupString();
+
+        try {
+            markup = (MarkupString) Markdig.Markdown.ToHtml(s);
+            return true;
+        }
+        catch(Exception) {
+            return false;
+        }
+    }
+}

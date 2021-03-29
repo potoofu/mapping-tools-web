@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
 @using MappingToolsWeb.Shared.Components.FileSystem
 @using MappingToolsWeb.Classes.Models
@@ -7,7 +7,7 @@
 @inject List<ChangelogModel> Changelogs
 
 <MudThemeProvider Theme="@currentTheme"/>
-<MudDialogProvider/>
+<MudDialogProvider CloseButton="true" MaxWidth="MaxWidth.Large" />
 <MudSnackbarProvider/>
 
 <MudLayout>

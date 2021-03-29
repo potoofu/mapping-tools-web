@@ -2,45 +2,65 @@
 
 @inject ILanguageContainerService LanguageService;
 @inject IIndexedDbCache<ContentTag, IOrderedFileRecords, IFileRecord> IndexedDbCache
+@inject ILanguageContainerService LanguageService
 
-<MudText Typo="Typo.h5">Map Cleaner</MudText>
+<div class="d-flex">
+    <MudText Typo="Typo.h5" Style="line-height: 57px;">Map Cleaner</MudText>
+    <div class="ml-auto">
+        <MudIconButton OnClick="OpenDocs" Icon="@Icons.Filled.Help" Color="Color.Primary"></MudIconButton>
+        <MudIconButton Color="Color.Primary" Icon="@Icons.Filled.Settings"></MudIconButton>
+    </div>
+</div>
 
 <MudText Typo="Typo.subtitle1" Class="mt-8">@LanguageService["basic"]</MudText>
 
-<MudCheckBox @bind-Checked="@resnapObjects" Label="ResnapObjects" Color="Color.Primary" Class="d-flex"></MudCheckBox>
-<MudCheckBox @bind-Checked="@resnapBookmarks" Label="ResnapBookmarks" Color="Color.Primary" Class="d-flex"></MudCheckBox>
-<MudCheckBox @bind-Checked="@removeUnusedSamples" Label="RemoveUnusedSamples" Color="Color.Primary" Class="d-flex"></MudCheckBox>
-<MudCheckBox @bind-Checked="@removeMuting" Label="RemoveMuting" Color="Color.Primary" Class="d-flex"></MudCheckBox>
-<MudCheckBox @bind-Checked="@removeUnclickables" Label="RemoveUnclickables" Color="Color.Primary" Class="d-flex"></MudCheckBox>
-
+<MudCheckBox @bind-Checked="@resnapObjects" Label="ResnapObjects" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+<MudCheckBox @bind-Checked="@resnapBookmarks" Label="ResnapBookmarks" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+<MudCheckBox @bind-Checked="@removeUnusedSamples" Label="RemoveUnusedSamples" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+<MudCheckBox @bind-Checked="@removeMuting" Label="RemoveMuting" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+<MudCheckBox @bind-Checked="@removeUnclickables" Label="RemoveUnclickables" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
 
 <MudText Typo="Typo.subtitle1" Class="mt-4">@LanguageService["advanced"]</MudText>
 
-<MudCheckBox @bind-Checked="@usesVolumeChangesInSliders" Label="UsesVolumeChangesInSliders" Color="Color.Primary" Class="d-flex"></MudCheckBox>
-<MudCheckBox @bind-Checked="@usesSampleSetChanges" Label="UsesSampleSetChanges" Color="Color.Primary" Class="d-flex"></MudCheckBox>
-<MudCheckBox @bind-Checked="@usesVolumeChangesInSpinners" Label="UsesVolumeChangesInSpinners" Color="Color.Primary" Class="d-flex"></MudCheckBox>
+<MudCheckBox @bind-Checked="@usesVolumeChangesInSliders" Label="UsesVolumeChangesInSliders" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+<MudCheckBox @bind-Checked="@usesSampleSetChanges" Label="UsesSampleSetChanges" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+<MudCheckBox @bind-Checked="@usesVolumeChangesInSpinners" Label="UsesVolumeChangesInSpinners" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
 
-<MudSelect Class="mt-4" AdornmentColor="Color.Primary" T="string" Label="Signatures" HelperText="Pick the relevant signatures" MultiSelection="true" @bind-SelectedValues="selectedSignatures">
+<MudSelect Class="mt-4" AdornmentColor="Color.Secondary" T="string" Label="Signatures" HelperText="Pick the relevant signatures" MultiSelection="true" @bind-SelectedValues="selectedSignatures">
     @foreach(var sig in signatures) {
         <MudSelectItem Value="sig">@sig</MudSelectItem>
     }
 </MudSelect>
 
-<div class="d-flex">
-    @if(beatmaps.Count > 0) {
-        <MudSelect AdornmentColor="Color.Primary" T="IFileRecord" Label="Beatmaps" HelperText="Select beatmap to clean" @bind-Value="selectedBeatmap">
-            @foreach(var map in beatmaps) {
-                <MudSelectItem Value="map">@map.Name</MudSelectItem>
-            }
-        </MudSelect>
-        <MudIconButton Icon="@Icons.Material.Filled.DoubleArrow" Color="Color.Secondary" OnClick="RunTool" Size="Size.Large" Class="ma-5" />
-    }
-    else {
-        <MudText Typo="Typo.subtitle1">Could not find any uploaded beatmap files to clean</MudText>
-    }
-</div>
+<MudPaper Class="mt-16">
+    <div class="d-flex ma-5">
+        @if(beatmaps.Count > 0) {
+            <MudSelect AdornmentColor="Color.Secondary" T="IFileRecord" Label="Beatmaps" HelperText="Select beatmap to clean" @bind-Value="selectedBeatmap">
+                @foreach(var map in beatmaps) {
+                    <MudSelectItem Value="map">@map.Name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudButton EndIcon="@Icons.Material.Filled.DoubleArrow" Color="Color.Secondary" OnClick="RunTool" Size="Size.Large" Class="my-5 ml-5">Run</MudButton>
+        }
+        else {
+            <MudText Color="Color.Secondary" Typo="Typo.subtitle1">Could not find any uploaded beatmap files to clean</MudText>
+        }
+    </div>
+
+    <MudDialog @bind-IsVisible="dialogVisible" DisableSidePadding="true">
+        <TitleContent>
+            <MudText Typo="Typo.h5">Docs: Map Cleaner</MudText>
+        </TitleContent>
+        <DialogContent>
+            <MudContainer Style="max-height: 300px; overflow-y: scroll">
+                <MarkdownWriter Path="@($"docs/{ LanguageService.CurrentCulture.Name }/map_cleaner.md")" />
+            </MudContainer>
+        </DialogContent>
+    </MudDialog>
+</MudPaper>
 
 @code {
+    bool dialogVisible;
     bool resnapObjects = true;
     bool resnapBookmarks;
     bool removeUnusedSamples;
@@ -50,6 +70,8 @@
     bool usesVolumeChangesInSliders = true;
     bool usesSampleSetChanges = true;
     bool usesVolumeChangesInSpinners;
+
+    MudMessageBox docsMessage;
 
     HashSet<string> selectedSignatures = new HashSet<string>();
 
@@ -71,6 +93,9 @@
 
         LoadBeatmaps();
     }
+
+    void OpenDocs() => dialogVisible = true;
+    void Ok() => dialogVisible = false;
 
     void RunTool() {
         // TODO: Implement run method
