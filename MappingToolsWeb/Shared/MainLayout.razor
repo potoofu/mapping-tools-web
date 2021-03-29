@@ -1,4 +1,4 @@
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 
 @using MappingToolsWeb.Shared.Components.FileSystem
 @using MappingToolsWeb.Classes.Models
@@ -12,12 +12,13 @@
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudLink Href="/" Typo="Typo.h5" Class="mr-10" Color="Color.Inherit" Underline="Underline.None">Mapping Tools Web</MudLink>
-        <MudLink Href="https://misakura-rin.github.io/mapping-tools-web-docs/" Typo="Typo.subtitle1" Underline="Underline.None" Color="Color.Inherit" Class="mr-10">Documentation</MudLink>
+        <MudText Style="user-select: none; font-weight: 300;" Typo="Typo.h5" Class="mr-10" Color="Color.Inherit">Mapping Tools Web</MudText>
         <MudLink Href="changelog/" Typo="Typo.subtitle1" Color="Color.Inherit" Underline="Underline.None" Class="mr-10">Changelog</MudLink>
         <MudAppBarSpacer />
-        <MudIconButton Color="Color.Inherit" Target="_Blank" Class="ma-0" Icon="fab fa-discord" Link="https://discord.gg/YfjKN2yjQV" />
-        <MudIconButton Color="Color.Inherit" Target="_Blank" Class="ma-0" Icon="@Icons.Custom.Brands.GitHub" Link="https://github.com/misakura-rin/mapping-tools-web" />
+        <MudPaper>
+            <MudIconButton Color="Color.Inherit" Target="_Blank" Class="ma-0" Icon="fab fa-discord" Link="https://discord.gg/YfjKN2yjQV" />
+            <MudIconButton Color="Color.Inherit" Target="_Blank" Class="ma-0" Icon="@Icons.Custom.Brands.GitHub" Link="https://github.com/misakura-rin/mapping-tools-web" />
+        </MudPaper>
         <MudIconButton Class="ma-0" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" OnClick="FilesToggleOpen" />
     </MudAppBar>
     <MudDrawer Variant="DrawerVariant.Persistent" Open="true" Elevation="2" Class="pa-3">
