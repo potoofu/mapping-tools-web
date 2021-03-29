@@ -6833,7 +6833,7 @@
       "url": "icons\/mt_logo.svg"
     },
     {
-      "hash": "sha256-vcz6YTVg8xcVIe+hvWm03dqbxKo9JRp9hk5HXQXShk0=",
+      "hash": "sha256-NEE9VFZrYwZTEx4y67d6N6Cit6gKizgXgX+WtMV+6KQ=",
       "url": "index.html"
     },
     {
@@ -6993,7 +6993,7 @@
       "url": "_framework\/MappingToolsWeb.Localization.dll"
     },
     {
-      "hash": "sha256-gBDPwXYpS8gg9FOifJJkihTRMdckO8Cdo0vy3AKu\/Is=",
+      "hash": "sha256-nA2JNg3NNQiH3qUP+7KGrY4A3rYtLOu1JpQ+EwB+d1k=",
       "url": "_framework\/MappingToolsWeb.dll"
     },
     {
@@ -7141,7 +7141,7 @@
       "url": "_framework\/System.Private.CoreLib.dll"
     },
     {
-      "hash": "sha256-WNqbN8cXN25e3keIE2ovRho80I4y0eUHOeUQbXu+tGA=",
+      "hash": "sha256-ool1OFS0FfMInGxmIC+joD\/h1rXW8CCCPpgo+DWHwUc=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -7149,5 +7149,5 @@
       "url": "_framework\/blazor.webassembly.js"
     }
   ],
-  "version": "DvZaVqRM"
+  "version": "XOzA2J4C"
 };
