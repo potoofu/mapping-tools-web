@@ -1,4 +1,5 @@
 ﻿@using System.Globalization
+@using System.Threading
 
 @inject ILanguageContainerService LanguageService
 @inject ILocalizer Localizer
@@ -22,6 +23,9 @@
 
         await LocalStorage.SetItemAsync("language", value.Name);
         selected = new HashSet<CultureInfo> { value };
+
+        Thread.CurrentThread.CurrentCulture = value;
+        Thread.CurrentThread.CurrentUICulture = value;
 
         StateHasChanged();
     }

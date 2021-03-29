@@ -16,6 +16,7 @@ using System.Linq;
 using System.Net.Http.Json;
 using System.Collections.Generic;
 using MappingToolsWeb.Classes.Models;
+using System.Threading;
 
 namespace MappingToolsWeb {
 
@@ -62,10 +63,14 @@ namespace MappingToolsWeb {
             builder.Services.AddMudServices();
 
             var localizationAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.FullName.StartsWith("MappingToolsWeb.Localization"));
+            var localizer = new Localizer();
 
-            builder.Services.AddLanguageContainer(localizationAssembly, new Localizer().DefaultCulture);
+            builder.Services.AddLanguageContainer(localizationAssembly, localizer.DefaultCulture);
 
-            builder.Services.AddSingleton<ILocalizer>(new Localizer());
+            builder.Services.AddSingleton<ILocalizer>(localizer);
+
+            Thread.CurrentThread.CurrentCulture = localizer.DefaultCulture;
+            Thread.CurrentThread.CurrentUICulture = localizer.DefaultCulture;
 
             try {
                 var changelog = await httpClient.GetFromJsonAsync<List<ChangelogModel>>("https://api.github.com/repos/misakura-rin/mapping-tools-web/releases");
