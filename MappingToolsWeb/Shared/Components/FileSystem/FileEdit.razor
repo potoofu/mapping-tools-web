@@ -1,0 +1,79 @@
+﻿@using BlazorDownloadFile
+
+<div class="d-flex">
+    <MudTextField T="string" @bind-Value="name" @bind-Text="name" Label="@i18n["name"]"></MudTextField>
+    <MudIconButton Color="Color.Secondary" Class="my- ml-1" Icon="@Icons.Filled.FileDownload" OnClick="OnDownload"></MudIconButton>
+</div>
+
+
+<MudSelect Class="mt-4" T="ContentTag" Label="@i18n["contentType"]" HelperText="@i18n["selectContentType"]" @bind-Value="selectedContentTag">
+    @foreach(var tag in Enum.GetValues<ContentTag>()) {
+        <MudSelectItem Value="tag">@tag</MudSelectItem>
+    }
+</MudSelect>
+
+<div class="d-flex mt-6 align-center" style="cursor: default;" title="@i18n["size"]">
+    <MudIcon Class="mr-2" Icon="@Icons.Filled.Storage" /> 
+    <MudText Typo="Typo.subtitle2">@File.Data.Length.ToString() Bytes</MudText>
+</div>
+<div class="d-flex align-center" style="cursor: default;" title="@i18n["lastModified"]">
+    <MudIcon Class="mr-2" Icon="@Icons.Filled.AccessTime" /> 
+    <MudText Typo="Typo.subtitle2">@File.LastModified.ToString(i18n.CurrentCulture)</MudText>
+</div>
+
+<div class="d-flex justify-flex-end mt-6">
+    <MudButton Color="Color.Error" OnClick="RemoveFile">@i18n["delete"]</MudButton>
+    <MudButton Color="Color.Primary" Class="ml-auto" OnClick="ApplyChanges">@i18n["apply"]</MudButton>
+</div>
+
+@code {
+    [Inject] IBlazorDownloadFileService downloadService { get; set; }
+    [Inject] INestedIndexedDbCache<ContentTag, IOrderedRecords<IFileRecord>, IFileRecord> fileCache { get; set; }
+    [Inject] ILanguageContainerService i18n { get; set; }
+
+    [Parameter] public IFileRecord File { get; set; }
+    [Parameter] public EventHandler OnEditApplied {get; set;}
+
+    public event EventHandler EditApplied;
+
+    ContentTag selectedContentTag;
+    string name;
+
+    protected override void OnInitialized() {
+        i18n.InitLocalizedComponent(this);
+
+        name = File.Name;
+
+        selectedContentTag = File.Tag;
+        
+        EditApplied += OnEditApplied;
+    }
+
+    async Task OnDownload() {
+        await downloadService.DownloadFile(File.Name, File.Data, "application/octet-stream");
+    }
+
+    async Task ApplyChanges() {
+        var newFileRecord = new FileRecord {
+            Id = File.Id,
+            Name = name,
+            Tag = selectedContentTag,
+            Data = File.Data,
+            LastModified = DateTime.Now
+        };
+
+        await fileCache.ReplaceAsync(File, newFileRecord);
+
+        InvokeApplied();
+    }
+
+    async Task RemoveFile() {
+        await fileCache.RemoveAsync(File);
+
+        InvokeApplied();
+    }
+
+    void InvokeApplied() {
+        EditApplied?.Invoke(this, null);
+    }
+}

@@ -15,8 +15,11 @@ using AKSoftware.Localization.MultiLanguages;
 using System.Linq;
 using System.Net.Http.Json;
 using System.Collections.Generic;
-using MappingToolsWeb.Classes.Models;
+using MappingToolsWeb.Shared.Classes.Models;
 using System.Threading;
+using MappingToolsWeb.Shared.Classes.Settings;
+using MappingToolsWeb.Shared.Classes.Settings.Api;
+using BlazorDownloadFile;
 
 namespace MappingToolsWeb {
 
@@ -30,13 +33,15 @@ namespace MappingToolsWeb {
 
             var host = builder.Build();
 
-            ConfigureServices(host);
+            await ConfigureServices(host);
 
             await host.RunAsync();
         }
 
         private static async Task LoadServices(WebAssemblyHostBuilder builder) {
             var httpClient = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
+            var localizationAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.FullName.StartsWith("MappingToolsWeb.Localization"));
+            var localizer = new Localizer();
 
             builder.Services.AddScoped(sp => httpClient);
 
@@ -52,22 +57,30 @@ namespace MappingToolsWeb {
                         Auto = true
                     }
                 });
+
+                store.Stores.Add(new StoreSchema {
+                    Name = "backups",
+                    PrimaryKey = new IndexSpec {
+                        Name = "id",
+                        KeyPath = "id",
+                        Auto = true
+                    }
+                });
             });
 
             builder.Services.AddBlazoredLocalStorage();
 
-            builder.Services.AddSingleton<IContentTagManager>(sp => new ContentTagManager());
+            builder.Services.AddScoped<IMappingToolsSettingsService, MappingToolsSettingsService>();
 
-            builder.Services.AddSingleton<IIndexedDbCache<ContentTag, IOrderedFileRecords, IFileRecord>>(sp => new IndexedDbCache());
+            builder.Services.AddScoped<IContentTagManager, ContentTagManager>();
 
-            builder.Services.AddMudServices();
-
-            var localizationAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.FullName.StartsWith("MappingToolsWeb.Localization"));
-            var localizer = new Localizer();
+            builder.Services.AddScoped<INestedIndexedDbCache<ContentTag, IOrderedRecords<IFileRecord>, IFileRecord>, FileCache>();
 
             builder.Services.AddLanguageContainer(localizationAssembly, localizer.DefaultCulture);
 
-            builder.Services.AddSingleton<ILocalizer>(localizer);
+            builder.Services.AddScoped<ILocalizer, Localizer>();
+
+            builder.Services.AddBlazorDownloadFile();
 
             Thread.CurrentThread.CurrentCulture = localizer.DefaultCulture;
             Thread.CurrentThread.CurrentUICulture = localizer.DefaultCulture;
@@ -77,11 +90,13 @@ namespace MappingToolsWeb {
                 builder.Services.AddSingleton(changelog);
             }
             catch( Exception ) {
-                builder.Services.AddSingleton(new List<ChangelogModel>());
+                builder.Services.AddScoped<List<ChangelogModel>>();
             }
+
+            builder.Services.AddMudServices();
         }
 
-        private static void ConfigureServices(WebAssemblyHost host) {
+        private static async Task ConfigureServices(WebAssemblyHost host) {
         }
     }
 }
