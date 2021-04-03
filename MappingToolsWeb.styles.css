@@ -23,17 +23,24 @@ ul.file-table-list li[b-wbc1o7c8uu] {
     }
 }
 
+.logo[b-dfo5wz5qmm] {
+    width: 25vw;
+    height: 25vh;
+}
+
 .spinning-logo[b-dfo5wz5qmm] {
     animation: spin-b-dfo5wz5qmm 4s linear infinite;
 }
 
-.centered[b-dfo5wz5qmm] {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%,-50%);
-}
-
 .loading-container[b-dfo5wz5qmm] {
     text-align: center;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--mud-palette-background);
 }

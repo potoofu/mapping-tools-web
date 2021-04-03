@@ -1,6 +1,6 @@
 {
-  "name": "MappingToolsWeb",
-  "short_name": "MTWeb",
+  "name": "osu! Mapping Tools",
+  "short_name": "osu! MT",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
