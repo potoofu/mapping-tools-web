@@ -1,70 +1,75 @@
 ﻿@inherits LayoutComponentBase
 
-@using MappingToolsWeb.Shared.Components.FileSystem
-@using MappingToolsWeb.Classes.Models
-
-@inject ILocalStorageService LocalStorage
-@inject List<ChangelogModel> Changelogs
-
 <MudThemeProvider Theme="@currentTheme"/>
 <MudDialogProvider CloseButton="true" MaxWidth="MaxWidth.Large" />
 <MudSnackbarProvider/>
 
-<MudLayout>
-    <MudAppBar Elevation="1">
-        <MudText Style="user-select: none; font-weight: 300;" Typo="Typo.h5" Class="mr-10" Color="Color.Inherit">Mapping Tools Web</MudText>
-        <MudLink Href="changelog/" Typo="Typo.subtitle1" Color="Color.Inherit" Underline="Underline.None" Class="mr-10">Changelog</MudLink>
-        <MudAppBarSpacer />
-        <MudPaper>
-            <MudIconButton Color="Color.Inherit" Target="_Blank" Class="ma-0" Icon="fab fa-discord" Link="https://discord.gg/YfjKN2yjQV" />
-            <MudIconButton Color="Color.Inherit" Target="_Blank" Class="ma-0" Icon="@Icons.Custom.Brands.GitHub" Link="https://github.com/misakura-rin/mapping-tools-web" />
-        </MudPaper>
-        <MudIconButton Class="ma-0" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" OnClick="FilesToggleOpen" />
-    </MudAppBar>
-    <MudDrawer Variant="DrawerVariant.Persistent" Open="true" Elevation="2" Class="pa-3">
-        <a href="" class="mud-drawer-header" style="padding: 0;">
-            <img width="100px" height="100px" src="icons/mt_logo.svg" style="margin-left: auto; margin-right: auto;" />
-        </a>
-        <MudText Typo="Typo.caption" Align="Align.Center">@GetVersion()</MudText>
-        <div class="d-flex mb-4" style="justify-content: center;">
-            <MudToggleIconButton 
-                Class="ma-0"
-                Color="Color.Primary"
-                ToggledColor="Color.Inherit"
-                Edge="Edge.Start"
-                Toggled="@isLightTheme" 
-                ToggledChanged="ToggleTheme" 
-                Icon="@Icons.Material.Filled.NightlightRound"
-                ToggledIcon="@Icons.Material.Outlined.WbSunny">
-            </MudToggleIconButton>
-            <MudIconButton Color="Color.Primary" Class="ma-0" Icon="@Icons.Filled.Translate" OnClick="OnLanguageClicked"></MudIconButton>
-            <MudIconButton Color="Color.Primary" Class="ma-0" Icon="@Icons.Filled.Settings" Link="settings/"></MudIconButton>
-        </div>
-        <ToolMenu />
-    </MudDrawer>
-    <MudDrawer @bind-Open="filesOpen" Elevation="2" Anchor="Anchor.Right" ClipMode="DrawerClipMode.Always" Class="pa-3">
-        <FileSystem />
-    </MudDrawer>
-    <MudMainContent>
-        <MudContainer Class="py-10">
-            @Body
-        </MudContainer>
-    </MudMainContent>
-</MudLayout>
+<LoadingScreen>
+    <MudLayout>
+        <MudAppBar Elevation="1">
+            <MudText Style="user-select: none;" Typo="Typo.h5" Class="mr-10" Color="Color.Inherit">osu! Mapping Tools</MudText>
+            <MudAppBarSpacer />
+            <div class="mr-5">
+                <MudToggleIconButton
+                    Class="ma-0"
+                    Color="Color.Inherit"
+                    ToggledColor="Color.Inherit"
+                    Edge="Edge.Start"
+                    Toggled="@isLightTheme" 
+                    ToggledChanged="ToggleTheme" 
+                    Icon="@Icons.Material.Filled.NightlightRound"
+                    ToggledIcon="@Icons.Material.Outlined.WbSunny">
+                </MudToggleIconButton>
+                <MudIconButton Color="Color.Inherit" Class="ma-0" Icon="@Icons.Filled.Translate" OnClick="OnLanguageClicked"></MudIconButton>
+                <MudIconButton Color="Color.Inherit" Class="ma-0" Icon="@Icons.Filled.Settings" Link="settings/"></MudIconButton>
+            </div>
+            <MudIconButton Class="ma-0" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" OnClick="FilesToggleOpen" />
+        </MudAppBar>
+        <MudDrawer Variant="DrawerVariant.Persistent" Open="true" Elevation="2" Class="pa-3">
+            <a href="" class="mud-drawer-header" style="padding: 0;">
+                <img width="100px" height="100px" src="icons/mt_logo.svg" style="margin-left: auto; margin-right: auto;" />
+            </a>
+            <MudText Typo="Typo.subtitle2" Align="Align.Center">@GetVersion()</MudText>
+            <div class="d-flex mb-4 mt-2 justify-center align-center">
+                <MudIconButton Color="Color.Inherit" Target="_Blank" Class="ma-0" Icon="fab fa-discord" Link="https://discord.gg/YfjKN2yjQV" />
+                <MudIconButton Color="Color.Inherit" Target="_Blank" Class="ma-0 ml-2" Icon="@Icons.Custom.Brands.GitHub" Link="https://github.com/misakura-rin/mapping-tools-web" />
+                <MudIconButton Color="Color.Inherit" Target="_Blank" Class="ma-0 ml-2" Icon="fab fa-patreon" Link="https://www.patreon.com/OliBomby"></MudIconButton>
+            </div>
+            <NavMenu />
+        </MudDrawer>
+        <MudDrawer Width="100%" Height="100%" @bind-Open="filesOpen" Elevation="2" Anchor="Anchor.Right" ClipMode="DrawerClipMode.Always" Variant="DrawerVariant.Persistent" Class="pa-2">  
+            <FileSystem />
+        </MudDrawer>
+        <MudMainContent>
+            <MudContainer MaxWidth="MaxWidth.False" Class="py-10">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+</LoadingScreen>
 
-<MudMessageBox @ref="languageMessage" Title="Change language" >
-    <MessageContent>
-        <LanguageSelector />
-    </MessageContent>
-</MudMessageBox>
+<MudDialog @bind-IsVisible="languageSelectVisible" DisableSidePadding="true">
+    <TitleContent>
+        <MudText Typo="Typo.h5" Class="mr-12">@i18n["changeLanguage"]</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudContainer Class="pb-11" Style="min-width: 400px;">
+            <LanguageSelector ParentEventHandler="OnLanguageSelected" />
+        </MudContainer>
+    </DialogContent>
+</MudDialog>
 
 @code {
+    [Inject] ILocalStorageService localStorage { get; set; }
+    [Inject] List<ChangelogModel> changelogs { get; set; }
+    [Inject] ILanguageContainerService i18n { get; set; }
+
     enum Theme {
         Dark,
         Light
     }
 
-    MudMessageBox languageMessage;
+    bool languageSelectVisible;
 
     bool toolsOpen = true;
     bool filesOpen = true;
@@ -99,7 +104,9 @@
     };
 
     protected override async Task OnInitializedAsync() {
-        var theme = await LocalStorage.GetItemAsync<Theme>("theme");
+        i18n.InitLocalizedComponent(this);
+
+        var theme = await localStorage.GetItemAsync<Theme>("theme");
 
         switch(theme) {
             case Theme.Dark:
@@ -117,11 +124,11 @@
     async Task ToggleTheme(bool _) {
         if(currentTheme == lightTheme) {
             SetDarkTheme();
-            await LocalStorage.SetItemAsync<Theme>("theme", Theme.Dark);
+            await localStorage.SetItemAsync<Theme>("theme", Theme.Dark);
         }
         else {
             SetLightTheme();
-            await LocalStorage.SetItemAsync<Theme>("theme", Theme.Light);
+            await localStorage.SetItemAsync<Theme>("theme", Theme.Light);
         }
     }
 
@@ -143,12 +150,16 @@
         filesOpen = !filesOpen;
     }
 
-    async Task OnLanguageClicked() {
-        await languageMessage.Show();
+    void OnLanguageClicked() => languageSelectVisible = true;
+
+    void OnLanguageSelected(object sender, EventArgs e) {
+        languageSelectVisible = false;
+
+        StateHasChanged();
     }
 
     string GetVersion() {
-        var first = Changelogs.FirstOrDefault();
+        var first = changelogs.FirstOrDefault();
 
         if(first == null) {
             return "v0.0.0";

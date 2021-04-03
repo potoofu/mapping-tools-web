@@ -1,3 +1,9 @@
 ﻿@page "/"
 
-<h1>Release Notes will be shown on this page</h1>
+@code {
+    [Inject] ILanguageContainerService i18n { get; set; }
+    
+    protected override void OnInitialized() {
+        i18n.InitLocalizedComponent(this);
+    }
+}

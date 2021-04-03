@@ -1,12 +1,18 @@
-<LoadingScreen>
-    <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
-        <Found Context="routeData">
-            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        </Found>
-        <NotFound>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <p>Sorry, there's nothing at this address.</p>
-            </LayoutView>
-        </NotFound>
-    </Router>
-</LoadingScreen>
+@inject ILanguageContainerService I18n
+
+<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p>@I18n["404"]</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@code {
+    protected override void OnInitialized() {
+        I18n.InitLocalizedComponent(this);
+    }
+}

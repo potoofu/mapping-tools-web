@@ -1,18 +1,14 @@
 ﻿@page "/changelog"
 
-@using MappingToolsWeb.Classes.Models
-
-@inject List<ChangelogModel> Changelogs
-
 <MudText Typo="Typo.h5">Changelog</MudText>
 
 <MudList>
-    @foreach(var log in Changelogs) {
+    @foreach(var log in changelogs) {
         <MudListItem>
             <MudCard>
                 <MudCardContent>
                     <MudText Typo="Typo.h6">@log.TagName</MudText>
-                    <MudText Typo="Typo.caption">@log.PublishedAt</MudText>
+                    <MudText Typo="Typo.caption">@(log.PublishedAt.ToString(i18n.CurrentCulture))</MudText>
                     <div Class="mt-3">@((MarkupString) Markdig.Markdown.ToHtml(log.Body))</div>
                 </MudCardContent>
                 <MudCardActions>
@@ -22,3 +18,12 @@
         </MudListItem>
     }
 </MudList>
+
+@code {
+    [Inject] ILanguageContainerService i18n { get; set; }
+    [Inject] List<ChangelogModel> changelogs { get; set; }
+
+    protected override void OnInitialized() {
+        i18n.InitLocalizedComponent(this);
+    }
+}
