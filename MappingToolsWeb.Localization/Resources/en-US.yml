@@ -1,3 +1,46 @@
-# shared
+# 0 shared
 basic: Basic
 advanced: Advanced
+404: There seems to be nothing at this address...
+changelog: Changelog
+signatures: Signatures
+changeLanguage: Change language
+settings: Settings
+name: Name
+contentType: Content Type
+selectContentType: Select the content type for this file
+size: Size
+lastModified: Last modified
+delete: Delete
+apply: Apply
+backups: Backups
+general: General
+tools: Tools
+
+# 1 tools
+## 1.0 shared
+tools_shared_noBeatmap: Could not find any beatmaps.
+## 1.1 map cleaner
+tools_mapCleaner_resnapObjects: Resnap objects
+tools_mapCleaner_resnapBookmarks: Resnap bookmarks
+tools_mapCleaner_removeUnusedSamples: Remove unused samples
+tools_mapCleaner_removeMuting: Remove muting
+tools_mapCleaner_removeUnclickables: Remove unclickables
+tools_mapCleaner_usesVolumeChangesInSliders: Uses volume changes in sliders?
+tools_mapCleaner_usesVolumeChangesInSpinners: Uses volume changes in spinners?
+tools_mapCleaner_usesSampleSetChanges: Uses sample set changes?
+tools_mapCleaner_signatureHelpText: Pick relevant signatures
+tools_mapCleaner_docsHeader: Documentation for Map Cleaner
+
+# 2 standalone components
+## 2.0 shared
+## 2.1 markdown writer
+standaloneComponents_markdownWriter_noDocsFound: Could not find any documentation in this language.
+## 2.2 file system
+standaloneComponents_fileSystem_audio: Audio
+standaloneComponents_fileSystem_beatmap: Beatmap
+standaloneComponents_fileSystem_image: Image
+standaloneComponents_fileSystem_storyboard: Storyboard
+standaloneComponents_fileSystem_video: Video
+standaloneComponents_fileSystem_undefined: Undefined
+standaloneComponents_fileSystem_upload: Upload files

@@ -1,3 +1,46 @@
-# shared
+# 0 shared
 basic: Einfach
 advanced: Fortgeschritten
+404: An dieser Adresse scheint es nichts zu geben...
+changelog: Änderungsprotokoll
+signatures: Signaturen
+changeLanguage: Sprache ändern
+settings: Einstellungen
+name: Name
+contentType: Inhaltstyp
+selectContentType: Wähle den Inhaltstyp der Datei aus
+size: Größe
+lastModified: Zuletzt verändert
+delete: Löschen
+apply: Übernehmen
+backups: Sicherungskopien
+general: Allgemein
+tools: Werkzeuge
+
+# 1 tools
+## 1.0 shared
+tools_shared_noBeatmap: Could not find any beatmaps.
+## 1.1 map cleaner
+tools_mapCleaner_resnapObjects: Objekte einrasten
+tools_mapCleaner_resnapBookmarks: Lesezeichen einrasten
+tools_mapCleaner_removeUnusedSamples: Entferne ungenutzte Samples
+tools_mapCleaner_removeMuting: Entferne stumme Objekte
+tools_mapCleaner_removeUnclickables: Entferne nicht-klickbare Objekte
+tools_mapCleaner_usesVolumeChangesInSliders: Werden Veränderungen der Lautstärke in Sliders genutzt?
+tools_mapCleaner_usesVolumeChangesInSpinners: Werden Veränderungen der Lautstärke in Spinners genutzt?
+tools_mapCleaner_usesSampleSetChanges: Werden Veränderungen des Sample-Sets genutzt?
+tools_mapCleaner_signatureHelpText: Suche relevante Signaturen aus
+tools_mapCleaner_docsHeader: Dokumentation für den Map Cleaner
+
+# 2 standalone components
+## 2.0 shared
+## 2.1 markdown writer
+standaloneComponents_markdownWriter_noDocsFound: Für die derzeitige Sprache ist keine Dokumentation vorhanden.
+## 2.2 file system
+standaloneComponents_fileSystem_audio: Audio
+standaloneComponents_fileSystem_beatmap: Beatmap
+standaloneComponents_fileSystem_image: Bild
+standaloneComponents_fileSystem_storyboard: Storyboard
+standaloneComponents_fileSystem_video: Video
+standaloneComponents_fileSystem_undefined: Undefiniert
+standaloneComponents_fileSystem_upload: Dateien hochladen
