@@ -5,14 +5,14 @@ using System.Linq;
 
 namespace MappingToolsWeb.IndexedDB.Api {
 
-    public enum OrderBy {
+    public enum OrderRecordsBy {
         Name,
         Size,
         LastModified
     }
 
-    public class OrderedFileRecords :IOrderedFileRecords {
-        public List<IFileRecord> OrderedRecords { get; set; } = new List<IFileRecord>();
+    public class OrderedFileRecords :IOrderedRecords<IFileRecord> {
+        public List<IFileRecord> OrderedRecords { get; private set; } = new List<IFileRecord>();
 
         public bool IsAscending {
             get { return _ascending; }
@@ -22,7 +22,7 @@ namespace MappingToolsWeb.IndexedDB.Api {
             }
         }
 
-        public OrderBy OrderedBy {
+        public OrderBackupsBy OrderedBy {
             get {
                 return _orderedby;
             }
@@ -34,7 +34,7 @@ namespace MappingToolsWeb.IndexedDB.Api {
 
         private readonly List<IFileRecord> _records = new List<IFileRecord>();
         private bool _ascending = true;
-        private OrderBy _orderedby = OrderBy.Name;
+        private OrderBackupsBy _orderedby = OrderBackupsBy.Name;
 
         public void Add(IFileRecord record, bool order = true) {
             _records.Add(record);
@@ -80,20 +80,26 @@ namespace MappingToolsWeb.IndexedDB.Api {
             }
         }
 
+        public void Clear() {
+            _records.Clear();
+
+            Order();
+        }
+
         public void Order() {
             if( _ascending ) {
                 OrderedRecords = ( _orderedby switch {
-                    OrderBy.Name => _records.OrderBy(o => o.Name),
-                    OrderBy.Size => _records.OrderBy(o => o.Data.Length),
-                    OrderBy.LastModified => _records.OrderBy(o => o.LastModified),
+                    OrderBackupsBy.Name => _records.OrderBy(o => o.Name),
+                    OrderBackupsBy.Size => _records.OrderBy(o => o.Data.Length),
+                    OrderBackupsBy.BackedUpOn => _records.OrderBy(o => o.LastModified),
                     _ => _records.OrderBy(o => o.Name),
                 } ).ToList();
             }
             else {
                 OrderedRecords = ( _orderedby switch {
-                    OrderBy.Name => _records.OrderByDescending(o => o.Name),
-                    OrderBy.Size => _records.OrderByDescending(o => o.Data.Length),
-                    OrderBy.LastModified => _records.OrderByDescending(o => o.LastModified),
+                    OrderBackupsBy.Name => _records.OrderByDescending(o => o.Name),
+                    OrderBackupsBy.Size => _records.OrderByDescending(o => o.Data.Length),
+                    OrderBackupsBy.BackedUpOn => _records.OrderByDescending(o => o.LastModified),
                     _ => _records.OrderByDescending(o => o.Name),
                 } ).ToList();
             }
