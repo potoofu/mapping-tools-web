@@ -1,16 +1,15 @@
-﻿@using TG.Blazor.IndexedDB
-
-@inject IndexedDBManager IndexedDbMgr
-@inject IContentTagManager IContentTagManager
-@inject IIndexedDbCache<ContentTag, IOrderedFileRecords, IFileRecord> IndexedDbCache
-
-<div class="@ContainerClass">
+﻿<div class="@ContainerClass">
     @if(Files.Count > 0) {
-        <MudList Clickable="false" Dense="true">
-            <MudListItem Icon="@Icon" Text="@Name" InitiallyExpanded="false">
+        <MudList Class="file-table-list" Clickable="true" Dense="true">
+            <MudListItem Icon="@Icon" Text="@Name" InitiallyExpanded="IsExpanded">
                 <NestedList>
                     @foreach(var file in Files) {
-                        <MudListItem>@file.Name</MudListItem>
+                        <MudListItem Style="cursor: default;">
+                            <div class="d-flex">
+                                <MudText Class="mr-auto" title="@file.Name" Style="user-select: none; line-height: 36px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@file.Name</MudText>
+                                <MudIconButton Size="Size.Small" Class="ml-2 pa-2" Color="Color.Secondary" OnClick="() => OpenEdit(file)" Icon="@Icons.Filled.Edit"></MudIconButton> 
+                            </div>
+                        </MudListItem>
                     }
                 </NestedList>
             </MudListItem>
@@ -20,81 +19,75 @@
 
 <MudProgressLinear Class="@ProgressBarClass" Color="Color.Secondary" Indeterminate="true" />
 
+<MudDialog @bind-IsVisible="editVisible" DisableSidePadding="true">
+    <TitleContent>
+        <MudText Typo="Typo.h5" Class="mr-12">Edit file</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudContainer Style="max-height: 600px; min-width: 400px; overflow-y: scroll">
+            <FileEdit @ref="fileEdit" OnEditApplied="OnEditApplied" File="@fileToEdit" />
+        </MudContainer>
+    </DialogContent>
+</MudDialog>
+
 @code {
-    [Parameter]
-    public string Name { get; set; } = "NOT SET";
+    [Inject] INestedIndexedDbCache<ContentTag, IOrderedRecords<IFileRecord>, IFileRecord> fileCache { get; set; }
+    [Inject] ILanguageContainerService i18n { get; set; }
 
-    [Parameter]
-    public ContentTag Tag { get; set; } = ContentTag.Undefined;
+    [Parameter] public bool IsExpanded { get; set;  }
+    [Parameter] public string Name { get; set; }
+    [Parameter] public ContentTag Tag { get; set; } = ContentTag.Undefined;
+    [Parameter] public string Icon { get; set; }
 
-    [Parameter]
-    public long MaxFileSize { get; set; } = 1024000000;
-
-    [Parameter]
-    public string Icon { get; set; }
-
+    bool editVisible;
+    IFileRecord fileToEdit;
+    FileEdit fileEdit;
     List<IFileRecord> Files { get; set; } = new List<IFileRecord>();
-
-    string ProgressBarClass = "d-none file-table-loader my-7";
-
+    string ProgressBarClass = "d-none file-upload-progressbar my-7";
     string ContainerClass = "";
 
     protected override void OnInitialized()
     {
-        IndexedDbCache.CacheHasChanged += OnCacheChanged;
+        i18n.InitLocalizedComponent(this);
 
-        if(IndexedDbCache.Cache.ContainsKey(Tag)) {
-            var cached = IndexedDbCache.Cache.GetValueOrDefault(Tag);
+        fileCache.CacheHasChanged += OnCacheChanged;
 
+        if(fileCache.TryGetValue(Tag, out var cached)) {
             Files = cached.OrderedRecords;
         }
     }
 
-    public async Task AddFileAsync(IBrowserFile file)
-    {
-        ProgressBarClass = "file-table-loader my-7";
+   public void RefreshData() {
+        ProgressBarClass = "file-upload-progressbar my-7";
         ContainerClass = "d-none";
 
-        await InvokeAsync(StateHasChanged);
+        StateHasChanged();
 
-        var fileRecord = await ConvertFileToFileRecordAsync(file);
-
-        await IndexedDbMgr.AddRecord(new StoreRecord<IFileRecord> {
-            Storename = "files",
-            Data = fileRecord
-        });
-
-        IndexedDbCache.Add(fileRecord);
-    }
-
-    private async Task<IFileRecord> ConvertFileToFileRecordAsync(IBrowserFile file) {
-        using var fileStream = file.OpenReadStream(MaxFileSize);
-
-        var buffer = new byte[fileStream.Length];
-
-        await fileStream.ReadAsync(buffer);
-
-        return new FileRecord {
-            Name = file.Name,
-            Tag = Tag,
-            LastModified = DateTime.Now,
-            Data = buffer
-        };
-    }
-
-    private void OnCacheChanged(object sender, EventArgs e) {
-        if(IndexedDbCache.Cache.ContainsKey(Tag)) {
-            var cached = IndexedDbCache.Cache.GetValueOrDefault(Tag);
-
+        if(fileCache.TryGetValue(Tag, out var cached)) {
             Files = cached.OrderedRecords;
         }
         else {
             Files.Clear();
         }
 
-        ProgressBarClass = "d-none file-table-loader my-7";
+        ProgressBarClass = "d-none file-upload-progressbar my-7";
         ContainerClass = "";
 
         StateHasChanged();
+    }
+
+    void OnCacheChanged(object sender, EventArgs e) {
+        RefreshData();
+    }
+
+    void OnEditApplied(object sender, EventArgs e) {
+        editVisible = false;
+        
+        StateHasChanged();
+    }
+
+    void OpenEdit(IFileRecord file) {
+        fileToEdit = file;
+        editVisible = true;
     }
 }

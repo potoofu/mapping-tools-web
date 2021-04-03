@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MappingToolsWeb", "MappingT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MappingToolsWeb.IndexedDB", "MappingToolsWeb.IndexedDB\MappingToolsWeb.IndexedDB.csproj", "{FC672B11-1D27-4405-9BC4-4329A78F9124}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MappingToolsWeb.Localization", "MappingToolsWeb.Localization\MappingToolsWeb.Localization.csproj", "{25409F46-F274-4B9A-89AD-C97FDA5CBBB5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MappingToolsWeb.Localization", "MappingToolsWeb.Localization\MappingToolsWeb.Localization.csproj", "{25409F46-F274-4B9A-89AD-C97FDA5CBBB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

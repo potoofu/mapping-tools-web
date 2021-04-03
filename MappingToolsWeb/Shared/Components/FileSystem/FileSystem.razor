@@ -1,60 +1,138 @@
-﻿@using MappingToolsWeb.IndexedDB
+﻿@using TG.Blazor.IndexedDB
 
-@inject IContentTagManager ContentTagManager
+<div class="d-flex flex-column mb-16" style="height: 100%;">
     <InputFile id="fileInput" OnChange="OnFileInputChanged" hidden multiple />
-
     <MudButton 
-        Style="min-height: 35px; max-height: 35px;"
-        Class="mb-3 mt-3"
+        Style="min-height: 35px; max-height: 35px; width: 100%;"
+        Class="mb-5 mt-3"
         HtmlTag="label"
         Variant="Variant.Filled"
         Color="Color.Secondary"
         StartIcon="@Icons.Filled.FileUpload"
-        for="fileInput">Upload Files
+        for="fileInput">@i18n["standaloneComponents_fileSystem_upload"]
     </MudButton>
+    <MudProgressLinear @ref="progressBar" Value="@progressBarValue" Class="@progressBarClass" Color="Color.Secondary" />
+    <div class="@containerClass">
+        <FileTable Name="@i18n["standaloneComponents_fileSystem_audio"]" Tag="ContentTag.Audio" Icon="@Icons.Filled.Audiotrack" />
+        <FileTable Name="@i18n["standaloneComponents_fileSystem_beatmap"]" IsExpanded="true" Tag="ContentTag.OsuBeatmap" Icon="@Icons.Filled.Map" />
+        <FileTable Name="@i18n["standaloneComponents_fileSystem_image"]" Tag="ContentTag.Image" Icon="@Icons.Filled.Image" />
+        <FileTable Name="@i18n["standaloneComponents_fileSystem_storyboard"]" Tag="ContentTag.OsuStoryboard" Icon="@Icons.Filled.Dashboard" />
+        <FileTable Name="@i18n["standaloneComponents_fileSystem_video"]" Tag="ContentTag.Video" Icon="@Icons.Filled.VideoLibrary" />
+        <FileTable  Name="@i18n["standaloneComponents_fileSystem_undefined"]" Tag="ContentTag.Undefined" Icon="@Icons.Filled.SpaceBar" />
+    </div>
+    <div class="d-flex justify-center mt-auto">
+        <MudIconButton Icon="@Icons.Filled.DeleteSweep" Color="Color.Secondary" OnClick="OnDeleteAll"></MudIconButton>
+    </div>
+</div>
 
-    <FileTable @ref="_audioTable" Name="Audio" Tag="ContentTag.Audio" Icon="@Icons.Filled.Audiotrack" />
-    <FileTable @ref="_beatmapTable" Name="Beatmap" Tag="ContentTag.OsuBeatmap" Icon="@Icons.Filled.Map" />
-    <FileTable @ref="_imageTable" Name="Image" Tag="ContentTag.Image" Icon="@Icons.Filled.Image" />
-    <FileTable @ref="_storyboardTable" Name="Storyboard" Tag="ContentTag.OsuStoryboard" Icon="@Icons.Filled.Dashboard" />
-    <FileTable @ref="_videoTable" Name="Video" Tag="ContentTag.Video" Icon="@Icons.Filled.VideoLibrary" />
-    <FileTable @ref="_undefinedTable" Name="Undefined" Tag="ContentTag.Undefined" Icon="@Icons.Filled.SpaceBar" />
+<MudDialog @ref="deleteDialog" DisableSidePadding="true">
+    <DialogContent>
+        <MudContainer>
+            <MudText Typo="Typo.subtitle1">Delete all files?</MudText>
+            <div class="d-flex justify-flex-end mt-4">
+                <MudButton Class="mr-5" OnClick="CloseDeleteAllFiles">Cancel</MudButton>
+                <MudButton Color="Color.Error" OnClick="DeleteAllFiles">Confirm</MudButton>
+            </div>
+        </MudContainer>
+    </DialogContent>
+</MudDialog>
 
 @code {
-    [Parameter]
-    public string CssClass { get; set; }
+    [Inject] IDialogService dialogService { get; set; }
+    [Inject] IContentTagManager contentTagManager { get; set; }
+    [Inject] ILanguageContainerService i18n { get; set; }
+    [Inject] INestedIndexedDbCache<ContentTag, IOrderedRecords<IFileRecord>, IFileRecord> fileCache { get; set; }
+    [Inject] IndexedDBManager indexedDb { get; set; }
 
-    FileTable _audioTable;
-    FileTable _imageTable;
-    FileTable _beatmapTable;
-    FileTable _storyboardTable;
-    FileTable _videoTable;
-    FileTable _undefinedTable;
+    [Parameter] public long MaxFileSize { get; set; } = 1024000000;
+
+    MudDialog deleteDialog;
+    double progressBarValue = 0;    
+    string progressBarClass = "d-none file-upload-progressbar my-7";
+    string containerClass = "";
+    MudProgressLinear progressBar;
+    bool deleteAllVisible;
+
+    protected override void OnInitialized() {
+        i18n.InitLocalizedComponent(this);
+    }
+
+    void OnDeleteAll() => deleteDialog.Show( null, new DialogOptions { NoHeader = true, CloseButton = false });
+
+    void CloseDeleteAllFiles() => deleteDialog.Close();
+
+    async Task DeleteAllFiles() {
+        deleteDialog.Close();
+
+        await fileCache.ClearAsync();
+    }
 
     async Task OnFileInputChanged(InputFileChangeEventArgs args) {
-        var files = args.GetMultipleFiles();
+        progressBarValue = 0;
 
-        foreach(var file in files) {
-            var fileTable = GetFileTableByFileContent(file);
+        SetLoading(true);
 
-            await fileTable.AddFileAsync(file);
+        var filesToUpload = args.GetMultipleFiles();
+
+        var progressStep = progressBar.Max / filesToUpload.Count - 1;
+
+        var records = new List<IFileRecord>();
+
+        foreach(var file in filesToUpload) {
+            var fileRecord = await StreamFileToRecord(file);
+
+            await indexedDb.AddRecord(new StoreRecord<IBackupRecord> {
+                Storename = "backups",
+                Data = new BackupRecord {
+                    File = fileRecord,
+                    ToolName = "File Upload",
+                    BackedUpOn = DateTime.Now
+                }
+            });
+
+            records.Add(fileRecord);
+
+            progressBarValue += progressStep;
+            
+            StateHasChanged();
+        }
+
+        await fileCache.AddAsync(records);
+
+        progressBarValue = 100;
+
+        StateHasChanged();
+
+        SetLoading(false);
+    }
+
+    void SetLoading(bool isLoading) {
+        if(isLoading) {
+            progressBarClass = "file-upload-progressbar my-7";
+            containerClass = "d-none";
+
+            StateHasChanged();
+        }
+        else {
+            progressBarClass = "d-none file-upload-progressbar my-7";
+            containerClass = "";
+
+            StateHasChanged();
         }
     }
 
-    FileTable GetFileTableByFileContent(IBrowserFile file) {
-        switch(ContentTagManager.GetContentTag(file.Name, file.ContentType)) {
-            case ContentTag.Audio:
-                return _audioTable;
-            case ContentTag.Image:
-                return _imageTable;
-            case ContentTag.OsuBeatmap:
-                return _beatmapTable;
-            case ContentTag.OsuStoryboard:
-                return _storyboardTable;
-            case ContentTag.Video:
-                return _videoTable;
-            default:
-                return _undefinedTable;
-        }
+    async Task<IFileRecord> StreamFileToRecord(IBrowserFile file) {
+        using var fileStream = file.OpenReadStream(MaxFileSize);
+
+        var buffer = new byte[fileStream.Length];
+
+        await fileStream.ReadAsync(buffer);
+
+        return new FileRecord {
+            Name = file.Name,
+            Tag = contentTagManager.GetContentTag(file.Name, file.ContentType),
+            LastModified = file.LastModified.DateTime,
+            Data = buffer
+        };
     }
 }

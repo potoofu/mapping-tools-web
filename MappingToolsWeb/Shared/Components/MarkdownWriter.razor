@@ -1,22 +1,22 @@
-@using Markdig
-
-@inject HttpClient Http
-
 @if(isError) {
-    <MudText Typo="Typo.subtitle1">Could not find any documentation for this tool.</MudText>
+    <MudText Typo="Typo.subtitle1">@i18n["standaloneComponents_markdownWriter_noDocsFound"]</MudText>
 }
 else {
     <div>@content</div>
 }
 
 @code {
-    [Parameter]
-    public string Path {get; set;}
+    [Inject] HttpClient http { get; set; }
+    [Inject] ILanguageContainerService i18n { get; set; }    
+
+    [Parameter] public string Path {get; set;}
 
     MarkupString content;
     bool isError;
 
     protected override async Task OnInitializedAsync() {
+        i18n.InitLocalizedComponent(this);
+
         await InitMarkdown();
     }
 
@@ -27,7 +27,7 @@ else {
         }
 
         try {
-            var doc = await Http.GetStringAsync(Path);
+            var doc = await http.GetStringAsync(Path);
             
             if(!TryGenerateHtml(doc, out var markup)) {
                 Console.WriteLine("markdown process error");

@@ -1,10 +1,5 @@
 ﻿@import url('css/variables.css');
 
-body {
-    background-color: var(--main-bg-color);
-    color: var(--main-text-color);
-}
-
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -24,7 +19,7 @@ body {
         top: 0.5rem;
     }
 
-.file-table-loader {
+.file-upload-progressbar {
     min-height: 3.5px;
     max-height: 3.5px;
 }

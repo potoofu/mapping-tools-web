@@ -2,13 +2,6 @@
 @using TG.Blazor.IndexedDB
 @using MappingToolsWeb.IndexedDB
 @using MappingToolsWeb.IndexedDB.Records
-@using MappingToolsWeb.IndexedDB.Records.Implementations
-
-@inject ILocalStorageService LocalStorage
-@inject IndexedDBManager IndexedDbMgr
-@inject IIndexedDbCache<ContentTag, IOrderedFileRecords, IFileRecord> IndexedDbCache
-@inject ILocalizer Localizer
-@inject ILanguageContainerService LanguageService
 
 @if (isLoaded)
 {
@@ -16,33 +9,40 @@
 }
 else
 {
-    <div class="centered loading-container">
-        <img style="width: 20vw; height: 20vh;" class="spinning-logo" src="icons/mt_logo.svg" />
+    <div class="loading-container">
+        <img class="logo spinning-logo" src="icons/mt_logo.svg" />
     </div>
 }
 
 @code {
-    protected bool isLoaded {get; set;}
+    [Inject] ILocalStorageService localStorage { get; set; }
+    [Inject] IndexedDBManager indexedDbMgr { get; set; }
+    [Inject] INestedIndexedDbCache<ContentTag, IOrderedRecords<IFileRecord>, IFileRecord> fileCache { get; set; }
+    [Inject] ILocalizer localizer { get; set; }
+    [Inject] ILanguageContainerService i18n { get; set; }
+    [Inject] IMappingToolsSettingsService settings { get; set; }
 
-    [Parameter]
-    public RenderFragment ChildContent { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    bool isLoaded;
 
     protected override async Task OnInitializedAsync()
     {
-        if(!IndexedDbCache.IsInitialized) {
-            var files = await IndexedDbMgr.GetRecords<FileRecord>("files");
-            IndexedDbCache.Initialize(files);
+        if(!fileCache.IsInitialized) {
+            await fileCache.InitializeAsync();
         }
 
-        var lang = await LocalStorage.GetItemAsync<string>("language");
+        var lang = await localStorage.GetItemAsync<string>("language");
 
         if(!string.IsNullOrWhiteSpace(lang)) {
             var culture = CultureInfo.CreateSpecificCulture(lang);
 
-            if(Localizer.SupportedCultures.Contains(culture)) {
-                LanguageService.SetLanguage(culture);
+            if(localizer.SupportedCultures.Contains(culture)) {
+                i18n.SetLanguage(culture);
             }
         }
+
+        await settings.LoadFromLocalStorageAsync();
 
         isLoaded = true;
     }

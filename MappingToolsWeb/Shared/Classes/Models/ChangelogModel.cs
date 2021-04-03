@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace MappingToolsWeb.Classes.Models {
+namespace MappingToolsWeb.Shared.Classes.Models {
 
     public class ChangelogModel {
 
@@ -17,7 +17,7 @@ namespace MappingToolsWeb.Classes.Models {
         [JsonPropertyName("body")]
         public string Body { get; set; }
 
-        [JsonPropertyName("url")]
+        [JsonPropertyName("html_url")]
         public string Url { get; set; }
     }
 }

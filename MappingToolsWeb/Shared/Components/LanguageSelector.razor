@@ -1,32 +1,52 @@
 ﻿@using System.Globalization
 @using System.Threading
 
-@inject ILanguageContainerService LanguageService
-@inject ILocalizer Localizer
-@inject ILocalStorageService LocalStorage
-
-<MudSelect Dense="true" Class="mt-0" SelectedValues="selected" T="CultureInfo" ValueChanged="OnLanguageChanged">
-    @foreach(var locale in Localizer.SupportedCultures) {
-        <MudSelectItem Value="locale">@locale.NativeName</MudSelectItem>
+<style>
+    .language-selector > div {
+        margin-top: 0 !important;
     }
-</MudSelect>
+</style>
+
+<div class="d-flex align-center">
+    <MudIcon Class="mr-3" Icon="@Icons.Filled.Language" />
+    <MudSelect Class="ma-0 language-selector" Dense="true" SelectedValues="selected" T="CultureInfo" ValueChanged="OnLanguageChanged">
+        @foreach(var locale in localizer.SupportedCultures) {
+            <MudSelectItem Class="ma-0" Value="locale">@locale.NativeName</MudSelectItem>
+        }
+    </MudSelect>
+</div>
+
 
 @code {
+    [Inject] ILanguageContainerService i18n { get; set; }
+    [Inject] ILocalizer localizer { get; set; }
+    [Inject] ILocalStorageService localStorage { get; set; }
+
+    [Parameter] public EventHandler ParentEventHandler { get; set; }
+    
+    public event EventHandler LanguageHasChanged;
+
     HashSet<CultureInfo> selected;
 
     protected override void OnInitialized() {
-        selected = new HashSet<CultureInfo> { LanguageService.CurrentCulture };
+        i18n.InitLocalizedComponent(this);
+
+        LanguageHasChanged += ParentEventHandler;
+        
+        selected = new HashSet<CultureInfo> { i18n.CurrentCulture };
     }
 
     async Task OnLanguageChanged(CultureInfo value) {
-        LanguageService.SetLanguage(value);
+        i18n.SetLanguage(value);
 
-        await LocalStorage.SetItemAsync("language", value.Name);
+        await localStorage.SetItemAsync("language", value.Name);
         selected = new HashSet<CultureInfo> { value };
 
         Thread.CurrentThread.CurrentCulture = value;
         Thread.CurrentThread.CurrentUICulture = value;
 
         StateHasChanged();
+
+        LanguageHasChanged?.Invoke(this, null);
     }
 }
