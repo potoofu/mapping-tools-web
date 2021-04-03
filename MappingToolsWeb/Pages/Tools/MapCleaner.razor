@@ -1,115 +1,111 @@
 ﻿@page "/mapcleaner"
 
-@inject ILanguageContainerService LanguageService;
-@inject IIndexedDbCache<ContentTag, IOrderedFileRecords, IFileRecord> IndexedDbCache
-@inject ILanguageContainerService LanguageService
+@using MappingToolsWeb.Shared.Components.Tools
+@using MappingToolsWeb.Shared.Components.Tools.MapCleaner
 
-<div class="d-flex">
-    <MudText Typo="Typo.h5" Style="line-height: 57px;">Map Cleaner</MudText>
-    <div class="ml-auto">
-        <MudIconButton OnClick="OpenDocs" Icon="@Icons.Filled.Help" Color="Color.Primary"></MudIconButton>
-        <MudIconButton Color="Color.Primary" Icon="@Icons.Filled.Settings"></MudIconButton>
-    </div>
-</div>
+<ToolBase Name="Map Cleaner" DocsPath="@($"docs/{ i18n.CurrentCulture.Name }/map_cleaner.md")">
+    <Settings>
+        <MapCleanerSettings />
+    </Settings>
 
-<MudText Typo="Typo.subtitle1" Class="mt-8">@LanguageService["basic"]</MudText>
+    <Content>
+        <MudText Typo="Typo.subtitle1" Class="mt-8">@i18n["basic"]</MudText>
 
-<MudCheckBox @bind-Checked="@resnapObjects" Label="ResnapObjects" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
-<MudCheckBox @bind-Checked="@resnapBookmarks" Label="ResnapBookmarks" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
-<MudCheckBox @bind-Checked="@removeUnusedSamples" Label="RemoveUnusedSamples" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
-<MudCheckBox @bind-Checked="@removeMuting" Label="RemoveMuting" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
-<MudCheckBox @bind-Checked="@removeUnclickables" Label="RemoveUnclickables" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@resnapObjects" Label="@i18n["tools_mapCleaner_resnapObjects"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@resnapBookmarks" Label="@i18n["tools_mapCleaner_resnapBookmarks"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@removeUnusedSamples" Label="@i18n["tools_mapCleaner_removeUnusedSamples"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@removeMuting" Label="@i18n["tools_mapCleaner_removeMuting"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@removeUnclickables" Label="@i18n["tools_mapCleaner_removeUnclickables"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
 
-<MudText Typo="Typo.subtitle1" Class="mt-4">@LanguageService["advanced"]</MudText>
+        <MudText Typo="Typo.subtitle1" Class="mt-4">@i18n["advanced"]</MudText>
 
-<MudCheckBox @bind-Checked="@usesVolumeChangesInSliders" Label="UsesVolumeChangesInSliders" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
-<MudCheckBox @bind-Checked="@usesSampleSetChanges" Label="UsesSampleSetChanges" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
-<MudCheckBox @bind-Checked="@usesVolumeChangesInSpinners" Label="UsesVolumeChangesInSpinners" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@usesVolumeChangesInSliders" Label="@i18n["tools_mapCleaner_usesVolumeChangesInSliders"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@usesVolumeChangesInSpinners" Label="@i18n["tools_mapCleaner_usesVolumeChangesInSpinners"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@usesSampleSetChanges" Label="@i18n["tools_mapCleaner_usesSampleSetChanges"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
 
-<MudSelect Class="mt-4" AdornmentColor="Color.Secondary" T="string" Label="Signatures" HelperText="Pick the relevant signatures" MultiSelection="true" @bind-SelectedValues="selectedSignatures">
-    @foreach(var sig in signatures) {
-        <MudSelectItem Value="sig">@sig</MudSelectItem>
-    }
-</MudSelect>
+        <MudSelect Class="mt-4" AdornmentColor="Color.Secondary" T="string" Label="@i18n["signatures"]" HelperText="@i18n["tools_mapCleaner_signatureHelpText"]" MultiSelection="true" @bind-SelectedValues="selectedSignatures">
+            @foreach(var sig in MapCleanerSettings.Signatures) {
+                <MudSelectItem Value="sig">@sig</MudSelectItem>
+            }
+        </MudSelect>
 
-<MudPaper Class="mt-16">
-    <div class="d-flex ma-5">
-        @if(beatmaps.Count > 0) {
-            <MudSelect AdornmentColor="Color.Secondary" T="IFileRecord" Label="Beatmaps" HelperText="Select beatmap to clean" @bind-Value="selectedBeatmap">
-                @foreach(var map in beatmaps) {
-                    <MudSelectItem Value="map">@map.Name</MudSelectItem>
+        <MudPaper Class="mt-16">
+            <div class="d-flex ma-5">
+                @if(beatmaps.Count > 0) {
+                    <MudSelect AdornmentColor="Color.Secondary" T="IFileRecord" Label="Beatmaps" HelperText="@i18n["tools_mapCleaner_signatureHelpText"]" @bind-Value="selectedBeatmap">
+                        @foreach(var map in beatmaps) {
+                            <MudSelectItem Value="map">@map.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudButton EndIcon="@Icons.Material.Filled.DoubleArrow" Color="Color.Secondary" OnClick="RunTool" Size="Size.Large" Class="my-5 ml-5">Run</MudButton>
                 }
-            </MudSelect>
-            <MudButton EndIcon="@Icons.Material.Filled.DoubleArrow" Color="Color.Secondary" OnClick="RunTool" Size="Size.Large" Class="my-5 ml-5">Run</MudButton>
-        }
-        else {
-            <MudText Color="Color.Secondary" Typo="Typo.subtitle1">Could not find any uploaded beatmap files to clean</MudText>
-        }
-    </div>
-
-    <MudDialog @bind-IsVisible="dialogVisible" DisableSidePadding="true">
-        <TitleContent>
-            <MudText Typo="Typo.h5">Docs: Map Cleaner</MudText>
-        </TitleContent>
-        <DialogContent>
-            <MudContainer Style="max-height: 300px; overflow-y: scroll">
-                <MarkdownWriter Path="@($"docs/{ LanguageService.CurrentCulture.Name }/map_cleaner.md")" />
-            </MudContainer>
-        </DialogContent>
-    </MudDialog>
-</MudPaper>
+                else {
+                    <MudText Color="Color.Secondary" Typo="Typo.subtitle1">@i18n["tools_shared_noBeatmap"]</MudText>
+                }
+            </div>
+        </MudPaper>
+    </Content>
+</ToolBase>
 
 @code {
-    bool dialogVisible;
-    bool resnapObjects = true;
+    [Inject] ILanguageContainerService i18n { get; set; }
+    [Inject] INestedIndexedDbCache<ContentTag, IOrderedRecords<IFileRecord>, IFileRecord> fileCache { get; set; }
+    [Inject] IMappingToolsSettingsService mtSettings { get; set; }
+
+    bool resnapObjects;
     bool resnapBookmarks;
     bool removeUnusedSamples;
     bool removeMuting;
     bool removeUnclickables;
-
-    bool usesVolumeChangesInSliders = true;
-    bool usesSampleSetChanges = true;
+    bool usesVolumeChangesInSliders;
     bool usesVolumeChangesInSpinners;
-
-    MudMessageBox docsMessage;
-
+    bool usesSampleSetChanges;
     HashSet<string> selectedSignatures = new HashSet<string>();
-
-    string[] signatures = {
-        "1/4",
-        "1/6",
-        "1/8",
-        "1/12"
-    };
-
     IFileRecord selectedBeatmap;
-
-    List<IFileRecord> beatmaps;
+    List<IFileRecord> beatmaps = new List<IFileRecord>();
 
     protected override void OnInitialized() {
-        IndexedDbCache.CacheHasChanged += OnCacheChanged;
+        fileCache.CacheHasChanged += OnCacheChanged;
+        mtSettings.SettingsHaveChanged += OnSettingsChanged;
 
-        LanguageService.InitLocalizedComponent(this);
+        i18n.InitLocalizedComponent(this);
 
         LoadBeatmaps();
+
+        LoadDefaults();
     }
 
-    void OpenDocs() => dialogVisible = true;
-    void Ok() => dialogVisible = false;
-
-    void RunTool() {
-        // TODO: Implement run method
-        Console.WriteLine("NOT IMPLEMENTED");
+    void LoadDefaults() {
+        resnapObjects = mtSettings.Settings.MapCleaner.ResnapObjects;
+        resnapBookmarks = mtSettings.Settings.MapCleaner.ResnapBookmarks;
+        removeUnusedSamples = mtSettings.Settings.MapCleaner.RemoveUnusedSamples;
+        removeMuting = mtSettings.Settings.MapCleaner.RemoveMuting;
+        removeUnclickables = mtSettings.Settings.MapCleaner.RemoveUnclickables;
+        usesVolumeChangesInSliders = mtSettings.Settings.MapCleaner.UsesVolumeChangesInSliders;
+        usesVolumeChangesInSpinners = mtSettings.Settings.MapCleaner.UsesVolumeChangesInSpinners;
+        usesSampleSetChanges = mtSettings.Settings.MapCleaner.UsesSampleSetChanges;
+        selectedSignatures = mtSettings.Settings.MapCleaner.SelectedSignatures;
     }
+
+    async Task RunTool() {}
 
     void LoadBeatmaps() {
-        var maps = IndexedDbCache.Cache.GetValueOrDefault(ContentTag.OsuBeatmap);
-
-        beatmaps = maps != null ? maps.OrderedRecords : new List<IFileRecord>();
+        if(fileCache.TryGetValue(ContentTag.OsuBeatmap, out var maps)) {
+            beatmaps = maps.OrderedRecords;
+        }
+        else {
+            beatmaps = new List<IFileRecord>();
+        }
     }
 
     void OnCacheChanged(object sender, EventArgs e) {
         LoadBeatmaps();
+
+        StateHasChanged();
+    }
+
+    void OnSettingsChanged(object sender, EventArgs e) {
+        LoadDefaults();
 
         StateHasChanged();
     }

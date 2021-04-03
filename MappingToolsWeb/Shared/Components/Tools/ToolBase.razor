@@ -1,0 +1,53 @@
+﻿@inject ILanguageContainerService I18n
+
+<div class="d-flex">
+    <MudText Typo="Typo.h5" Style="line-height: 57px;">@Name</MudText>
+    <div class="ml-auto">
+        <MudIconButton OnClick="OpenDocs" Icon="@Icons.Filled.Help" Color="Color.Inherit"></MudIconButton>
+        <MudIconButton OnClick="OpenSettings" Color="Color.Inherit" Icon="@Icons.Filled.Settings"></MudIconButton>
+    </div>
+</div>
+
+@Content
+
+<MudDialog @bind-IsVisible="docsDialogVisible" DisableSidePadding="true">
+    <TitleContent>
+        <MudText Typo="Typo.h5" Class="mr-12">@I18n["tools_mapCleaner_docsHeader"]</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudContainer Style="max-height: 600px; min-width: 400px; overflow-y: scroll">
+            <MarkdownWriter Path="@DocsPath" />
+        </MudContainer>
+    </DialogContent>
+</MudDialog>
+
+<MudDialog @bind-IsVisible="settingsDialogVisible" DisableSidePadding="true">
+    <TitleContent>
+        <MudText Typo="Typo.h5" Class="mr-12">@I18n["settings"]</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudContainer Style="max-height: 600px; min-width: 400px; overflow-y: scroll">
+            @Settings
+        </MudContainer>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public RenderFragment Settings { get; set; }
+
+    [Parameter]
+    public RenderFragment Content { get; set; }
+
+    [Parameter]
+    public string Name { get; set; }
+
+    [Parameter]
+    public string DocsPath { get; set; }
+ 
+    bool docsDialogVisible;
+    bool settingsDialogVisible;
+
+    void OpenDocs() => docsDialogVisible = true;
+    void OpenSettings() => settingsDialogVisible = true;
+}

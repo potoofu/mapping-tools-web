@@ -1,0 +1,77 @@
+﻿@inject ILanguageContainerService I18n
+@inject IMappingToolsSettingsService Settings
+
+<div>
+    <MudText Typo="Typo.h5">Defaults</MudText>
+
+    <MudCheckBox @bind-Checked="@ResnapObjects" Label="@I18n["tools_mapCleaner_resnapObjects"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+    <MudCheckBox @bind-Checked="@ResnapBookmarks" Label="@I18n["tools_mapCleaner_resnapBookmarks"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+    <MudCheckBox @bind-Checked="@RemoveUnusedSamples" Label="@I18n["tools_mapCleaner_removeUnusedSamples"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+    <MudCheckBox @bind-Checked="@RemoveMuting" Label="@I18n["tools_mapCleaner_removeMuting"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+    <MudCheckBox @bind-Checked="@RemoveUnclickables" Label="@I18n["tools_mapCleaner_removeUnclickables"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+
+    <MudCheckBox @bind-Checked="@UsesVolumeChangesInSliders" Label="@I18n["tools_mapCleaner_usesVolumeChangesInSliders"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+    <MudCheckBox @bind-Checked="@UsesVolumeChangesInSpinners" Label="@I18n["tools_mapCleaner_usesVolumeChangesInSpinners"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+    <MudCheckBox @bind-Checked="@UsesSampleSetChanges" Label="@I18n["tools_mapCleaner_usesSampleSetChanges"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+
+    <MudSelect Class="mt-4" AdornmentColor="Color.Secondary" T="string" Label="@I18n["signatures"]" HelperText="@I18n["tools_mapCleaner_signatureHelpText"]" MultiSelection="true" @bind-SelectedValues="SelectedSignatures">
+        @foreach(var sig in Signatures) {
+            <MudSelectItem Value="sig">@sig</MudSelectItem>
+        }
+    </MudSelect>
+
+    <div class="d-flex justify-flex-end">
+        <MudButton Color="Color.Primary" Class="ml-auto" OnClick="WriteSettings">Apply</MudButton>
+    </div>
+</div>
+
+@code {
+    public static string[] Signatures = {
+        "1/4",
+        "1/6",
+        "1/8",
+        "1/12"
+    };
+
+    bool ResnapObjects;
+    bool ResnapBookmarks;
+    bool RemoveUnusedSamples;
+    bool RemoveMuting;
+    bool RemoveUnclickables;
+    bool UsesVolumeChangesInSliders;
+    bool UsesVolumeChangesInSpinners;
+    bool UsesSampleSetChanges;
+    HashSet<string> SelectedSignatures = new HashSet<string>();
+
+    protected override void OnInitialized() {
+        I18n.InitLocalizedComponent(this);
+
+        LoadSettings();
+    }
+
+    async Task WriteSettings() {
+        Settings.Settings.MapCleaner.ResnapObjects = ResnapObjects;
+        Settings.Settings.MapCleaner.ResnapBookmarks = ResnapBookmarks;
+        Settings.Settings.MapCleaner.RemoveUnusedSamples = RemoveUnusedSamples;
+        Settings.Settings.MapCleaner.RemoveMuting = RemoveMuting;
+        Settings.Settings.MapCleaner.RemoveUnclickables = RemoveUnclickables;
+        Settings.Settings.MapCleaner.UsesVolumeChangesInSliders = UsesVolumeChangesInSliders;
+        Settings.Settings.MapCleaner.UsesVolumeChangesInSpinners = UsesVolumeChangesInSpinners;
+        Settings.Settings.MapCleaner.UsesSampleSetChanges = UsesSampleSetChanges;
+        Settings.Settings.MapCleaner.SelectedSignatures = SelectedSignatures;
+
+        await Settings.WriteToLocalStorageAsync();
+    }
+
+    void LoadSettings() {
+        ResnapObjects = Settings.Settings.MapCleaner.ResnapObjects;
+        ResnapBookmarks = Settings.Settings.MapCleaner.ResnapBookmarks;
+        RemoveUnusedSamples = Settings.Settings.MapCleaner.RemoveUnusedSamples;
+        RemoveMuting = Settings.Settings.MapCleaner.RemoveMuting;
+        RemoveUnclickables = Settings.Settings.MapCleaner.RemoveUnclickables;
+        UsesVolumeChangesInSliders = Settings.Settings.MapCleaner.UsesVolumeChangesInSliders;
+        UsesVolumeChangesInSpinners = Settings.Settings.MapCleaner.UsesVolumeChangesInSpinners;
+        UsesSampleSetChanges = Settings.Settings.MapCleaner.UsesSampleSetChanges;
+        SelectedSignatures = Settings.Settings.MapCleaner.SelectedSignatures;
+    }
+}
