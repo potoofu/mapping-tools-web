@@ -1,27 +1,35 @@
-﻿using MappingToolsWeb.IndexedDB.Records;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MappingToolsWeb.IndexedDB {
 
-    public interface IIndexedDbCache<TKey, TValue, TData> {
-        bool IsInitialized { get; set; }
+    public interface IIndexedDbCache<TKey, TValue> {
+        bool IsInitialized { get; }
 
         event EventHandler CacheHasChanged;
 
-        SortedDictionary<TKey, TValue> Cache { get; set; }
+        string StoreName { get; }
 
-        void Initialize(IEnumerable<TData> records);
+        Task InitializeAsync();
 
-        void Add(TData data);
+        bool TryGetValue(TKey key, out TValue value);
 
-        void Add(IEnumerable<TData> data);
+        Task AddAsync(TValue data);
 
-        void Remove(TData data);
+        Task AddAsync(IEnumerable<TValue> data);
 
-        void Remove(IEnumerable<TData> data);
+        Task RemoveAsync(TValue data);
 
-        void Replace(TData data);
+        Task RemoveAsync(IEnumerable<TValue> data);
+
+        Task ReplaceAsync(TValue oldData, TValue newData);
+
+        Task ClearAsync();
+    }
+
+    public interface INestedIndexedDbCache<TKey, TValue, TData> :IIndexedDbCache<TKey, TData> {
+
+        bool TryGetValue(TKey key, out TValue value);
     }
 }
