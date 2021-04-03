@@ -1,0 +1,59 @@
+﻿@page "/backups"
+
+@using TG.Blazor.IndexedDB
+@using MappingToolsWeb.IndexedDB.Records
+@using MappingToolsWeb.IndexedDB.Records.Implementations
+@using BlazorDownloadFile
+
+<MudText Typo="Typo.h5">@i18n["backups"]</MudText>
+
+<MudTable Items="@backups" Hover="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Backups</MudText>
+        <MudToolBarSpacer />
+        <MudTextField T="string" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>File name</MudTh>
+        <MudTh>Tool used</MudTh>
+        <MudTh>Content type</MudTh>
+        <MudTh>Size</MudTh>
+        <MudTh>Backed up on</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="File name">@context.File.Name</MudTd>
+        <MudTd DataLabel="Tool used">@context.ToolName</MudTd>
+        <MudTd DataLabel="Content type">@context.File.Tag</MudTd>
+        <MudTd DataLabel="Size">@context.File.Data.Length</MudTd>
+        <MudTd DataLabel="Backed up on">@context.BackedUpOn</MudTd>
+        <MudTd DataLabel="Download"><MudIconButton Icon="@Icons.Filled.FileDownload"></MudIconButton></MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    [Inject] IndexedDBManager indexedDbMgr { get; set; }
+    [Inject] IBlazorDownloadFileService downloadService { get; set; }
+    [Inject] ILanguageContainerService i18n { get; set; }
+
+    List<BackupRecord> backups = new List<BackupRecord>();
+
+    protected override async Task OnInitializedAsync() {
+        i18n.InitLocalizedComponent(this);
+        
+        var backupss = await indexedDbMgr.GetRecords<BackupRecord>("backups");
+
+        if(backupss != null) {
+            Console.WriteLine(backupss.Count);
+        }
+        else{
+            Console.WriteLine("not found");
+        }
+    }
+
+    void DownloadBackup(IBackupRecord backup) {
+    }
+}
