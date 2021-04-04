@@ -1,0 +1,34 @@
+name: Deploy Hotfix
+on:
+  push:
+    tags:
+      - "hotfix*/v*.*.*"
+    
+jobs:
+  deploy-to-github-pages:
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT : true
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "5.0.x"
+
+      - name: Publish Project
+        run: dotnet publish MappingToolsWeb/MappingToolsWeb.csproj -c Release -o release --nologo
+
+      - name: Change base-tag in index.html 
+        run: sed -i 's/<base href="\/" \/>/<base href="\/mapping-tools-web\/" \/>/g' release/wwwroot/index.html
+
+      - name: copy index.html to 404.html
+        run: cp release/wwwroot/index.html release/wwwroot/404.html
+
+      - name: commit to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: release/wwwroot
