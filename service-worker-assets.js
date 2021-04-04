@@ -7005,7 +7005,7 @@
       "url": "_framework\/MappingToolsWeb.Localization.dll"
     },
     {
-      "hash": "sha256-U3VW0HJra+Yg8q4MgEUzA2xLQMRUqvCdVsrx6iTW+U8=",
+      "hash": "sha256-CDycTNHBIt+rp74X9dmfWqCuzq0UnpgW16ikKDFSslY=",
       "url": "_framework\/MappingToolsWeb.dll"
     },
     {
@@ -7153,7 +7153,7 @@
       "url": "_framework\/System.Private.CoreLib.dll"
     },
     {
-      "hash": "sha256-CYdXeGFiYHFGXqXLAGk3PU9K8bHw6NLO+COPSO4VzV4=",
+      "hash": "sha256-C1EFRGrTOR0YfvYwu7Z6f1HN3ulUdEfoc9FWTBs9nMM=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -7161,5 +7161,5 @@
       "url": "_framework\/blazor.webassembly.js"
     }
   ],
-  "version": "56foc5Vi"
+  "version": "mEtwJF4I"
 };
