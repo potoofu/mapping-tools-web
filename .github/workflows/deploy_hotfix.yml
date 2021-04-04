@@ -51,7 +51,6 @@ jobs:
               jsFile=$(echo -n "$jsFile" | sed "s;$oldHash;$newHash;g")
             fi
           done
-
           echo -n "$jsFile" > service-worker-assets.js
 
       - name: copy index.html to 404.html
