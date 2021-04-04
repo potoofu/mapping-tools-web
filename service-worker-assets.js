@@ -6841,7 +6841,7 @@
       "url": "icons\/mt_logo.svg"
     },
     {
-      "hash": "sha256-\/HcXJjwMbMltbofHyp28yGSl5JllUYTc6wUXHp+A9Ao=",
+      "hash": "sha256-HArXBKB22OxZwVbfB+vcx54wMiyoIM4kLVqYjGQ8YmI=",
       "url": "index.html"
     },
     {
