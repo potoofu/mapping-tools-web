@@ -8,7 +8,14 @@
     </div>
 </div>
 
-@Content
+<div class="d-flex flex-column">
+    <div style="width: 100%">
+        @Content
+    </div>
+    <div class="mt-auto">
+        @ActionElement
+    </div>
+</div>
 
 <MudDialog @bind-IsVisible="docsDialogVisible" DisableSidePadding="true">
     <TitleContent>
@@ -38,6 +45,9 @@
 
     [Parameter]
     public RenderFragment Content { get; set; }
+
+    [Parameter]
+    public RenderFragment ActionElement { get; set; }
 
     [Parameter]
     public string Name { get; set; }
