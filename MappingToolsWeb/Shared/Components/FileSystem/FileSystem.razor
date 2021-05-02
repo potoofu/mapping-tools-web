@@ -43,6 +43,7 @@
     [Inject] ILanguageContainerService i18n { get; set; }
     [Inject] INestedIndexedDbCache<ContentTag, IOrderedRecords<IFileRecord>, IFileRecord> fileCache { get; set; }
     [Inject] IndexedDBManager indexedDb { get; set; }
+    [Inject] ISnackbar SnackBar { get; set; }
 
     [Parameter] public long MaxFileSize { get; set; } = 1024000000;
 
@@ -72,38 +73,44 @@
 
         SetLoading(true);
 
-        var filesToUpload = args.GetMultipleFiles();
+        try {
+            var filesToUpload = args.GetMultipleFiles();
 
-        var progressStep = progressBar.Max / filesToUpload.Count - 1;
+            var progressStep = progressBar.Max / filesToUpload.Count - 1;
 
-        var records = new List<IFileRecord>();
+            var records = new List<IFileRecord>();
 
-        foreach(var file in filesToUpload) {
-            var fileRecord = await StreamFileToRecord(file);
+            foreach(var file in filesToUpload) {
+                var fileRecord = await StreamFileToRecord(file);
 
-            await indexedDb.AddRecord(new StoreRecord<IBackupRecord> {
-                Storename = "backups",
-                Data = new BackupRecord {
-                    File = fileRecord,
-                    ToolName = "File Upload",
-                    BackedUpOn = DateTime.Now
-                }
-            });
+                await indexedDb.AddRecord(new StoreRecord<IBackupRecord> {
+                    Storename = "backups",
+                    Data = new BackupRecord {
+                        File = fileRecord as FileRecord, // !!!! workaround for shit language not being able to use interfaces smh
+                        ToolName = "File Upload",
+                        BackedUpOn = DateTime.Now
+                    }
+                });
 
-            records.Add(fileRecord);
+                records.Add(fileRecord);
 
-            progressBarValue += progressStep;
+                progressBarValue += progressStep;
             
+                StateHasChanged();
+            }
+
+            await fileCache.AddAsync(records);
+
+            progressBarValue = 100;
+
             StateHasChanged();
+
+            SetLoading(false);
         }
-
-        await fileCache.AddAsync(records);
-
-        progressBarValue = 100;
-
-        StateHasChanged();
-
-        SetLoading(false);
+        catch(Exception e) {
+            SetLoading(false);
+            SnackBar.Add(e.Message, Severity.Error);
+        }
     }
 
     void SetLoading(bool isLoading) {
