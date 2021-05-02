@@ -1,12 +1,13 @@
 ﻿@inject ILanguageContainerService I18n
 @inject IMappingToolsSettingsService Settings
 
+@using Mapping_Tools_Core.BeatmapHelper.BeatDivisors
+
 <div>
     <MudText Typo="Typo.h5">Defaults</MudText>
 
     <MudCheckBox @bind-Checked="@ResnapObjects" Label="@I18n["tools_mapCleaner_resnapObjects"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
     <MudCheckBox @bind-Checked="@ResnapBookmarks" Label="@I18n["tools_mapCleaner_resnapBookmarks"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
-    <MudCheckBox @bind-Checked="@RemoveUnusedSamples" Label="@I18n["tools_mapCleaner_removeUnusedSamples"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
     <MudCheckBox @bind-Checked="@RemoveMuting" Label="@I18n["tools_mapCleaner_removeMuting"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
     <MudCheckBox @bind-Checked="@RemoveUnclickables" Label="@I18n["tools_mapCleaner_removeUnclickables"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
 
@@ -14,9 +15,9 @@
     <MudCheckBox @bind-Checked="@UsesVolumeChangesInSpinners" Label="@I18n["tools_mapCleaner_usesVolumeChangesInSpinners"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
     <MudCheckBox @bind-Checked="@UsesSampleSetChanges" Label="@I18n["tools_mapCleaner_usesSampleSetChanges"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
 
-    <MudSelect Class="mt-4" AdornmentColor="Color.Secondary" T="string" Label="@I18n["signatures"]" HelperText="@I18n["tools_mapCleaner_signatureHelpText"]" MultiSelection="true" @bind-SelectedValues="SelectedSignatures">
+    <MudSelect ToStringFunc="@divisorConverter" Class="mt-4" AdornmentColor="Color.Secondary" T="double" Label="@I18n["signatures"]" HelperText="@I18n["tools_mapCleaner_signatureHelpText"]" MultiSelection="true" @bind-SelectedValues="SelectedDivisors">
         @foreach(var sig in Signatures) {
-            <MudSelectItem Value="sig">@sig</MudSelectItem>
+            <MudSelectItem Value="sig.Divisor"></MudSelectItem>
         }
     </MudSelect>
 
@@ -26,22 +27,40 @@
 </div>
 
 @code {
-    public static string[] Signatures = {
-        "1/4",
-        "1/6",
-        "1/8",
-        "1/12"
+    public class Signature {
+        public string DisplayName { get; set; }
+        public double Divisor { get; set; }
+    }
+
+    public static Signature[] Signatures = {
+        new Signature {
+            DisplayName = "1/4",
+            Divisor = 1/.4
+        },
+        new Signature {
+            DisplayName = "1/6",
+            Divisor = 1/.6
+        },
+        new Signature {
+            DisplayName = "1/8",
+            Divisor = 1/.8
+        },
+        new Signature {
+            DisplayName = "1/12",
+            Divisor = 1/.12
+        }
     };
+
+    Func<double, string> divisorConverter = o => Signatures.First(x => x.Divisor == o).DisplayName;
 
     bool ResnapObjects;
     bool ResnapBookmarks;
-    bool RemoveUnusedSamples;
     bool RemoveMuting;
     bool RemoveUnclickables;
     bool UsesVolumeChangesInSliders;
     bool UsesVolumeChangesInSpinners;
     bool UsesSampleSetChanges;
-    HashSet<string> SelectedSignatures = new HashSet<string>();
+    HashSet<double> SelectedDivisors = new HashSet<double>();
 
     protected override void OnInitialized() {
         I18n.InitLocalizedComponent(this);
@@ -52,13 +71,12 @@
     async Task WriteSettings() {
         Settings.Settings.MapCleaner.ResnapObjects = ResnapObjects;
         Settings.Settings.MapCleaner.ResnapBookmarks = ResnapBookmarks;
-        Settings.Settings.MapCleaner.RemoveUnusedSamples = RemoveUnusedSamples;
         Settings.Settings.MapCleaner.RemoveMuting = RemoveMuting;
         Settings.Settings.MapCleaner.RemoveUnclickables = RemoveUnclickables;
         Settings.Settings.MapCleaner.UsesVolumeChangesInSliders = UsesVolumeChangesInSliders;
         Settings.Settings.MapCleaner.UsesVolumeChangesInSpinners = UsesVolumeChangesInSpinners;
         Settings.Settings.MapCleaner.UsesSampleSetChanges = UsesSampleSetChanges;
-        Settings.Settings.MapCleaner.SelectedSignatures = SelectedSignatures;
+        Settings.Settings.MapCleaner.SelectedSignatures = SelectedDivisors.Select(o => Signatures.FirstOrDefault(x => x.Divisor == o)).ToHashSet<Signature>();
 
         await Settings.WriteToLocalStorageAsync();
     }
@@ -66,12 +84,11 @@
     void LoadSettings() {
         ResnapObjects = Settings.Settings.MapCleaner.ResnapObjects;
         ResnapBookmarks = Settings.Settings.MapCleaner.ResnapBookmarks;
-        RemoveUnusedSamples = Settings.Settings.MapCleaner.RemoveUnusedSamples;
         RemoveMuting = Settings.Settings.MapCleaner.RemoveMuting;
         RemoveUnclickables = Settings.Settings.MapCleaner.RemoveUnclickables;
         UsesVolumeChangesInSliders = Settings.Settings.MapCleaner.UsesVolumeChangesInSliders;
         UsesVolumeChangesInSpinners = Settings.Settings.MapCleaner.UsesVolumeChangesInSpinners;
         UsesSampleSetChanges = Settings.Settings.MapCleaner.UsesSampleSetChanges;
-        SelectedSignatures = Settings.Settings.MapCleaner.SelectedSignatures;
+        SelectedDivisors = Settings.Settings.MapCleaner.SelectedSignatures.Select(o => o.Divisor).ToHashSet<double>();
     }
 }

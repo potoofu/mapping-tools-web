@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using static MappingToolsWeb.Shared.Components.Tools.MapCleaner.MapCleanerSettings;
 
 namespace MappingToolsWeb.Shared.Classes.Settings.Api {
 
-    public class MapCleanerSettings {
+    public class MapCleanerSettingsModel {
         public bool ResnapObjects { get; set; }
         public bool ResnapBookmarks { get; set; }
-        public bool RemoveUnusedSamples { get; set; }
         public bool RemoveMuting { get; set; }
         public bool RemoveUnclickables { get; set; }
 
@@ -14,6 +13,6 @@ namespace MappingToolsWeb.Shared.Classes.Settings.Api {
         public bool UsesSampleSetChanges { get; set; }
         public bool UsesVolumeChangesInSpinners { get; set; }
 
-        public HashSet<string> SelectedSignatures { get; set; } = new HashSet<string>();
+        public HashSet<Signature> SelectedSignatures { get; set; } = new HashSet<Signature>();
     }
 }
