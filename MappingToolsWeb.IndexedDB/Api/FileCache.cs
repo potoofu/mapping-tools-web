@@ -75,6 +75,8 @@ namespace MappingToolsWeb.IndexedDB.Api {
                 }
 
                 contentToRefresh.Add(record.Tag);
+
+                _cache.Remove(record.Tag);
             }
 
             var indexedRecords = await _indexedDbMgr.GetRecords<FileRecord>(StoreName);
@@ -157,9 +159,11 @@ namespace MappingToolsWeb.IndexedDB.Api {
         }
 
         public async Task ClearAsync() {
-            foreach(var cached in _cache.Values) {
+            foreach( var cached in _cache.Values ) {
                 cached.Clear();
             }
+
+            _cache.Clear();
 
             await _indexedDbMgr.ClearStore(StoreName);
 

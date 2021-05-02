@@ -5,20 +5,18 @@
 @using MappingToolsWeb.IndexedDB.Records.Implementations
 @using BlazorDownloadFile
 
-<MudText Typo="Typo.h5">@i18n["backups"]</MudText>
-
-<MudTable Items="@backups" Hover="true">
+<MudTable Items="@backupList" Hover="true" Filter="new Func<IBackupRecord,bool>(FilterBackups)">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Backups</MudText>
+        <MudText Typo="Typo.h5">@i18n["backups"]</MudText>
         <MudToolBarSpacer />
-        <MudTextField T="string" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        <MudTextField T="string" @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <HeaderContent>
-        <MudTh>File name</MudTh>
-        <MudTh>Tool used</MudTh>
-        <MudTh>Content type</MudTh>
-        <MudTh>Size</MudTh>
-        <MudTh>Backed up on</MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<IBackupRecord, object>(o => o.File.Name)">File name</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<IBackupRecord, object>(o => o.ToolName)">Tool used</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<IBackupRecord, object>(o => o.File.Tag)">Content type</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<IBackupRecord, object>(o => o.File.Data.Length)">Size</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<IBackupRecord, object>(o => o.BackedUpOn)">Backed up on</MudTableSortLabel></MudTh>
         <MudTh></MudTh>
     </HeaderContent>
     <RowTemplate>
@@ -27,33 +25,65 @@
         <MudTd DataLabel="Content type">@context.File.Tag</MudTd>
         <MudTd DataLabel="Size">@context.File.Data.Length</MudTd>
         <MudTd DataLabel="Backed up on">@context.BackedUpOn</MudTd>
-        <MudTd DataLabel="Download"><MudIconButton Icon="@Icons.Filled.FileDownload"></MudIconButton></MudTd>
+        <MudTd DataLabel="Download">
+            <MudIconButton OnClick="async () => await DownloadBackup(context)" Color="Color.Secondary" Icon="@Icons.Filled.FileDownload"></MudIconButton>
+        </MudTd>
     </RowTemplate>
     <PagerContent>
         <MudTablePager />
     </PagerContent>
 </MudTable>
 
+<MudProgressLinear Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
+
 @code {
     [Inject] IndexedDBManager indexedDbMgr { get; set; }
     [Inject] IBlazorDownloadFileService downloadService { get; set; }
     [Inject] ILanguageContainerService i18n { get; set; }
+    [Inject] ISnackbar SnackBar { get; set; }
 
-    List<BackupRecord> backups = new List<BackupRecord>();
+    List<IBackupRecord> backupList = new List<IBackupRecord>();
+    string searchString = "";
 
     protected override async Task OnInitializedAsync() {
         i18n.InitLocalizedComponent(this);
-        
-        var backupss = await indexedDbMgr.GetRecords<BackupRecord>("backups");
 
-        if(backupss != null) {
-            Console.WriteLine(backupss.Count);
-        }
-        else{
-            Console.WriteLine("not found");
+        var backups = await indexedDbMgr.GetRecords<BackupRecord>("backups");
+
+        if(backups != null) {
+            backupList.AddRange(backups);
         }
     }
 
-    void DownloadBackup(IBackupRecord backup) {
+    async Task DownloadBackup(IBackupRecord backup) {
+        var progress = new Progress<double>();
+
+        progress.ProgressChanged += OnDownloadProgressChanged;
+
+        await downloadService.DownloadFile(backup.File.Name, backup.File.Data, 32786, "application/octet-stream", progress);
+    }
+    
+    void OnDownloadProgressChanged(object sender, double progress) {
+        
+    }
+    
+    bool FilterBackups(IBackupRecord record) {
+        if(string.IsNullOrWhiteSpace(searchString)) {
+            return true;
+        }
+
+        if(record.File.Name.ToLower().Contains(searchString)) {
+            return true;
+        }
+
+        if(record.ToolName.ToLower().Contains(searchString)) {
+            return true;
+        }
+
+        if(record.File.Tag.ToString().ToLower().Contains(searchString)) {
+            return true;
+        }
+
+        return false;
     }
 }
