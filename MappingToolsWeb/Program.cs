@@ -20,6 +20,7 @@ using System.Threading;
 using MappingToolsWeb.Shared.Classes.Settings;
 using MappingToolsWeb.Shared.Classes.Settings.Api;
 using BlazorDownloadFile;
+using MudBlazor;
 
 namespace MappingToolsWeb {
 
@@ -50,7 +51,7 @@ namespace MappingToolsWeb {
                 store.Version = 1;
 
                 store.Stores.Add(new StoreSchema {
-                    Name = "files",
+                    Name = "backups",
                     PrimaryKey = new IndexSpec {
                         Name = "id",
                         KeyPath = "id",
@@ -59,7 +60,7 @@ namespace MappingToolsWeb {
                 });
 
                 store.Stores.Add(new StoreSchema {
-                    Name = "backups",
+                    Name = "files",
                     PrimaryKey = new IndexSpec {
                         Name = "id",
                         KeyPath = "id",
@@ -93,7 +94,16 @@ namespace MappingToolsWeb {
                 builder.Services.AddScoped<List<ChangelogModel>>();
             }
 
-            builder.Services.AddMudServices();
+            builder.Services.AddMudServices(config => {
+                config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomCenter;
+                config.SnackbarConfiguration.PreventDuplicates = false;
+                config.SnackbarConfiguration.NewestOnTop = false;
+                config.SnackbarConfiguration.ShowCloseIcon = true;
+                config.SnackbarConfiguration.VisibleStateDuration = 10000;
+                config.SnackbarConfiguration.HideTransitionDuration = 500;
+                config.SnackbarConfiguration.ShowTransitionDuration = 500;
+                config.SnackbarConfiguration.SnackbarVariant = Variant.Outlined;
+            });
         }
 
         private static async Task ConfigureServices(WebAssemblyHost host) {
