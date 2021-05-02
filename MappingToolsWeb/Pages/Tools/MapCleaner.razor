@@ -1,7 +1,15 @@
 ﻿@page "/mapcleaner"
 
+@using BlazorDownloadFile
 @using MappingToolsWeb.Shared.Components.Tools
 @using MappingToolsWeb.Shared.Components.Tools.MapCleaner
+@using Mapping_Tools_Core.BeatmapHelper.BeatDivisors
+@using Mapping_Tools_Core.BeatmapHelper.IO.Decoding
+@using Mapping_Tools_Core.BeatmapHelper.IO.Encoding
+@using Mapping_Tools_Core.Exceptions
+@using toolNamespace = Mapping_Tools_Core.Tools.MapCleanerStuff
+@using System.Text
+@using TG.Blazor.IndexedDB
 
 <ToolBase Name="Map Cleaner" DocsPath="@($"docs/{ i18n.CurrentCulture.Name }/map_cleaner.md")">
     <Settings>
@@ -13,7 +21,6 @@
 
         <MudCheckBox @bind-Checked="@resnapObjects" Label="@i18n["tools_mapCleaner_resnapObjects"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
         <MudCheckBox @bind-Checked="@resnapBookmarks" Label="@i18n["tools_mapCleaner_resnapBookmarks"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
-        <MudCheckBox @bind-Checked="@removeUnusedSamples" Label="@i18n["tools_mapCleaner_removeUnusedSamples"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
         <MudCheckBox @bind-Checked="@removeMuting" Label="@i18n["tools_mapCleaner_removeMuting"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
         <MudCheckBox @bind-Checked="@removeUnclickables" Label="@i18n["tools_mapCleaner_removeUnclickables"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
 
@@ -23,17 +30,18 @@
         <MudCheckBox @bind-Checked="@usesVolumeChangesInSpinners" Label="@i18n["tools_mapCleaner_usesVolumeChangesInSpinners"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
         <MudCheckBox @bind-Checked="@usesSampleSetChanges" Label="@i18n["tools_mapCleaner_usesSampleSetChanges"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
 
-        <MudSelect Class="mt-4" AdornmentColor="Color.Secondary" T="string" Label="@i18n["signatures"]" HelperText="@i18n["tools_mapCleaner_signatureHelpText"]" MultiSelection="true" @bind-SelectedValues="selectedSignatures">
-            @foreach(var sig in MapCleanerSettings.Signatures) {
-                <MudSelectItem Value="sig">@sig</MudSelectItem>
+        <MudSelect ToStringFunc="@divisorConverter" Class="mt-4" AdornmentColor="Color.Secondary" T="double" Label="@i18n["signatures"]" HelperText="@i18n["tools_mapCleaner_signatureHelpText"]" MultiSelection="true" @bind-SelectedValues="selectedDivisors">
+            @foreach (var sig in MapCleanerSettings.Signatures) {
+                <MudSelectItem Value="sig.Divisor"></MudSelectItem>
             }
         </MudSelect>
-
+    </Content>
+    <ActionElement>
         <MudPaper Class="mt-16">
             <div class="d-flex ma-5">
-                @if(beatmaps.Count > 0) {
+                @if (beatmaps.Count > 0) {
                     <MudSelect AdornmentColor="Color.Secondary" T="IFileRecord" Label="Beatmaps" HelperText="@i18n["tools_mapCleaner_signatureHelpText"]" @bind-Value="selectedBeatmap">
-                        @foreach(var map in beatmaps) {
+                        @foreach (var map in beatmaps) {
                             <MudSelectItem Value="map">@map.Name</MudSelectItem>
                         }
                     </MudSelect>
@@ -43,24 +51,34 @@
                     <MudText Color="Color.Secondary" Typo="Typo.subtitle1">@i18n["tools_shared_noBeatmap"]</MudText>
                 }
             </div>
+            <MudProgressLinear Value="@cleanerProgress" Color="@progressColor" />
         </MudPaper>
-    </Content>
+    </ActionElement>
 </ToolBase>
 
 @code {
     [Inject] ILanguageContainerService i18n { get; set; }
     [Inject] INestedIndexedDbCache<ContentTag, IOrderedRecords<IFileRecord>, IFileRecord> fileCache { get; set; }
     [Inject] IMappingToolsSettingsService mtSettings { get; set; }
+    [Inject] ISnackbar SnackBar { get; set; }
+    [Inject] IndexedDBManager indexedDb { get; set; }
+    [Inject] IBlazorDownloadFileService downloadService { get; set; }
+
+    Func<double, string> divisorConverter = o => MapCleanerSettings.Signatures.First(x => x.Divisor == o).DisplayName;
+
+
+    double cleanerProgress = 0;
+    Color progressColor = Color.Primary;
 
     bool resnapObjects;
     bool resnapBookmarks;
-    bool removeUnusedSamples;
     bool removeMuting;
     bool removeUnclickables;
     bool usesVolumeChangesInSliders;
     bool usesVolumeChangesInSpinners;
     bool usesSampleSetChanges;
-    HashSet<string> selectedSignatures = new HashSet<string>();
+    HashSet<double> selectedDivisors = new HashSet<double>();
+
     IFileRecord selectedBeatmap;
     List<IFileRecord> beatmaps = new List<IFileRecord>();
 
@@ -78,22 +96,136 @@
     void LoadDefaults() {
         resnapObjects = mtSettings.Settings.MapCleaner.ResnapObjects;
         resnapBookmarks = mtSettings.Settings.MapCleaner.ResnapBookmarks;
-        removeUnusedSamples = mtSettings.Settings.MapCleaner.RemoveUnusedSamples;
         removeMuting = mtSettings.Settings.MapCleaner.RemoveMuting;
         removeUnclickables = mtSettings.Settings.MapCleaner.RemoveUnclickables;
         usesVolumeChangesInSliders = mtSettings.Settings.MapCleaner.UsesVolumeChangesInSliders;
         usesVolumeChangesInSpinners = mtSettings.Settings.MapCleaner.UsesVolumeChangesInSpinners;
         usesSampleSetChanges = mtSettings.Settings.MapCleaner.UsesSampleSetChanges;
-        selectedSignatures = mtSettings.Settings.MapCleaner.SelectedSignatures;
+        selectedDivisors = mtSettings.Settings.MapCleaner.SelectedSignatures.Select(o => o.Divisor).ToHashSet<double>();
     }
 
-    async Task RunTool() {}
+    async Task RunTool() {
+        progressColor = Color.Primary;
+        cleanerProgress = 0;
 
-    void LoadBeatmaps() {
-        if(fileCache.TryGetValue(ContentTag.OsuBeatmap, out var maps)) {
-            beatmaps = maps.OrderedRecords;
+        StateHasChanged();
+
+        if (selectedBeatmap?.Data == null) {
+            SnackBar.Add("Could not find any beatmap data!", Severity.Error);
+            return;
+        }
+
+        if (selectedDivisors.Count() < 1) {
+            SnackBar.Add("Please select at least 1 beat signature!", Severity.Warning);
+            return;
+        }
+
+        var data = Encoding.UTF8.GetString(selectedBeatmap.Data, 0, selectedBeatmap.Data.Length);
+
+        if (string.IsNullOrWhiteSpace(data)) {
+            SnackBar.Add("Could not convert beatmap bytes to string!", Severity.Error);
+            return;
+        }
+
+        await UpdateProgress(10);
+
+        try {
+            var beatmap = new OsuBeatmapDecoder().Decode(data);
+
+            await UpdateProgress(20);
+
+            var args = new toolNamespace.MapCleanerArgs(
+                usesVolumeChangesInSliders,
+                usesSampleSetChanges,
+                usesVolumeChangesInSpinners,
+                resnapObjects,
+                resnapBookmarks,
+                removeMuting,
+                removeUnclickables,
+                selectedDivisors.Select(o => new IrrationalBeatDivisor(o))
+            );
+
+            var res = toolNamespace.MapCleaner.CleanMap(beatmap, args);
+
+            await UpdateProgress(50);
+
+            var encoded = new OsuBeatmapEncoder().Encode(beatmap);
+
+            await UpdateProgress(60);
+
+            await indexedDb.AddRecord(new StoreRecord<IBackupRecord> {
+                Storename = "backups",
+                Data = new BackupRecord
+                {
+                    File = selectedBeatmap as FileRecord, // !!!! workaround for shit language not being able to use interfaces smh
+                    ToolName = "Map Cleaner",
+                    BackedUpOn = DateTime.Now
+                }
+            });
+
+            await UpdateProgress(70);
+
+            var newFileRecord = new FileRecord {
+                Id = selectedBeatmap.Id,
+                Name = selectedBeatmap.Name,
+                Tag = selectedBeatmap.Tag,
+                Data = Encoding.UTF8.GetBytes(encoded),
+                LastModified = DateTime.Now
+            };
+
+            await fileCache.ReplaceAsync(selectedBeatmap, newFileRecord);
+
+           await  UpdateProgress(90);
+
+            var snackBarString = "";
+            snackBarString += "Successfully resnapped " + res.ObjectsResnapped + " objects\n";
+            snackBarString += "and " + res.TimingPointsRemoved + " timing points!";
+
+            SnackBar.Add(snackBarString, Severity.Success);
+
+            var progress = new Progress<double>();
+
+            progress.ProgressChanged += OnDownloadProgressChanged;
+
+            await downloadService.DownloadFile(newFileRecord.Name, newFileRecord.Data, 32786, "application/octet-stream", progress);
+        }
+        catch (BeatmapParsingException) {
+            SnackBar.Add("Could not parse beatmap data!", Severity.Error);
+        }
+        catch (Exception e) {
+            SnackBar.Add(e.Message + "\n" + e.StackTrace, Severity.Error);
+        }
+    }
+
+    async void OnDownloadProgressChanged(object sender, double progress) {
+        await UpdateProgress(100);
+    }
+
+    async Task UpdateProgress(double progress) {
+        if(progress == 100) {
+            progressColor = Color.Success;
+            cleanerProgress = 100;
+
+            StateHasChanged();
+
+            await Task.Delay(3000);
+
+            cleanerProgress = 0;
+            progressColor = Color.Primary;
         }
         else {
+            cleanerProgress = progress;
+        }
+
+        StateHasChanged();
+    }
+
+    void LoadBeatmaps() {
+        if (fileCache.TryGetValue(ContentTag.OsuBeatmap, out var maps)) {
+            beatmaps = maps.OrderedRecords;
+        }
+        else
+        {
             beatmaps = new List<IFileRecord>();
         }
     }
