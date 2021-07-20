@@ -15,7 +15,26 @@
                 <MudText Color="Color.Inherit">for the rhythm game osu!</MudText>
             </MudHidden>
             <MudAppBarSpacer />
-            <div class="mr-5">
+            <MudHidden Breakpoint="Breakpoint.Xs" Invert="true">
+                <MudMenu Icon="@Icons.Material.Filled.MoreVert" OffsetY="true">
+                    <div Class="d-flex flex-wrap px-1 flex-column">
+                        <MudToggleIconButton
+                            Class="ma-0"
+                            Color="Color.Inherit"
+                            ToggledColor="Color.Inherit"
+                            Edge="Edge.Start"
+                            Toggled="@isLightTheme" 
+                            ToggledChanged="ToggleTheme" 
+                            Icon="@Icons.Material.Filled.NightlightRound"
+                            ToggledIcon="@Icons.Material.Outlined.WbSunny">
+                        </MudToggleIconButton>
+                        <MudIconButton Color="Color.Inherit" Class="ma-0" Icon="@Icons.Filled.Translate" OnClick="OnLanguageClicked"></MudIconButton>
+                        <MudIconButton Color="Color.Inherit" Class="ma-0" Icon="@Icons.Filled.Settings" Link="settings/"></MudIconButton>
+                    </div>
+                </MudMenu>
+            </MudHidden>
+            
+            <MudHidden Breakpoint="Breakpoint.Xs">
                 <MudToggleIconButton
                     Class="ma-0"
                     Color="Color.Inherit"
@@ -28,7 +47,8 @@
                 </MudToggleIconButton>
                 <MudIconButton Color="Color.Inherit" Class="ma-0" Icon="@Icons.Filled.Translate" OnClick="OnLanguageClicked"></MudIconButton>
                 <MudIconButton Color="Color.Inherit" Class="ma-0" Icon="@Icons.Filled.Settings" Link="settings/"></MudIconButton>
-            </div>
+            </MudHidden>
+            
             <MudIconButton Class="ma-0" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" OnClick="FilesToggleOpen" />
         </MudAppBar>
         <MudDrawer Variant="DrawerVariant.Responsive"  @bind-Open="navOpen" Elevation="2" Class="pa-3" ClipMode="DrawerClipMode.Never" PreserveOpenState="true">
