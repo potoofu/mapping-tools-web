@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using static MappingToolsWeb.Shared.Components.Tools.MapCleaner.MapCleanerSettings;
+using static MappingToolsWeb.Pages.Tools.MapCleaner;
 
 namespace MappingToolsWeb.Shared.Classes.Settings.Api {
 

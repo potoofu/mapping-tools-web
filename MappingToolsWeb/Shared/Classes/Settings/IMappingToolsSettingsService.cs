@@ -1,16 +1,18 @@
-﻿using MappingToolsWeb.Shared.Classes.Settings.Api;
-using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace MappingToolsWeb.Shared.Classes.Settings {
 
     public interface IMappingToolsSettingsService {
-        public MappingToolsSettings Settings { get; set; }
+        Task<T> GetSettingsAsync<T>(string key);
 
-        public event EventHandler SettingsHaveChanged;
+        Task WriteToLocalStorageAsync<T>(string key);
 
-        Task LoadFromLocalStorageAsync();
+        Task LoadFromLocalStorageAsync<T>(string key);
 
-        Task WriteToLocalStorageAsync();
+        T GetSettings<T>(string key);
+
+        void WriteToLocalStorage<T>(string key);
+
+        void LoadFromLocalStorage<T>(string key);
     }
 }
