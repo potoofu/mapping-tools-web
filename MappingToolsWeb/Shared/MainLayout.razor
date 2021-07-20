@@ -6,7 +6,9 @@
 
 <LoadingScreen>
     <MudLayout>
-        <MudAppBar Elevation="1">
+        <MudAppBar Elevation="1" Style="text-overflow: ellipsis; white-space: nowrap;">
+            <MudIconButton Class="ma-0" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="NavToggleOpen" />
+            <MudAppBarSpacer />
             <MudText Style="user-select: none;" Typo="Typo.h5" Class="mr-4" Color="Color.Inherit">Mapping Tools</MudText>
             <MudText Color="Color.Inherit">for the rhythm game osu!</MudText>
             <MudAppBarSpacer />
@@ -26,7 +28,7 @@
             </div>
             <MudIconButton Class="ma-0" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" OnClick="FilesToggleOpen" />
         </MudAppBar>
-        <MudDrawer Variant="DrawerVariant.Persistent" Open="true" Elevation="2" Class="pa-3">
+        <MudDrawer Variant="DrawerVariant.Responsive"  @bind-Open="navOpen" Elevation="2" Class="pa-3">
             <a href="" class="mud-drawer-header" style="padding: 0;">
                 <img width="100px" height="100px" src="icons/mt_logo.svg" style="margin-left: auto; margin-right: auto;" />
             </a>
@@ -38,7 +40,7 @@
             </div>
             <NavMenu />
         </MudDrawer>
-        <MudDrawer Width="100%" Height="100%" @bind-Open="filesOpen" Elevation="2" Anchor="Anchor.Right" ClipMode="DrawerClipMode.Always" Variant="DrawerVariant.Persistent" Class="pa-2">  
+        <MudDrawer Width="100%" Height="100%" @bind-Open="filesOpen" Elevation="2" Anchor="Anchor.Right" ClipMode="DrawerClipMode.Always" Variant="DrawerVariant.Responsive" Class="pa-2">  
             <FileSystem />
         </MudDrawer>
         <MudMainContent>
@@ -74,6 +76,7 @@
 
     bool toolsOpen = true;
     bool filesOpen = true;
+    bool navOpen = true;
 
     bool isLightTheme;
 
@@ -149,6 +152,10 @@
 
     void FilesToggleOpen() {
         filesOpen = !filesOpen;
+    }
+
+    void NavToggleOpen() {
+        navOpen = !navOpen;
     }
 
     void OnLanguageClicked() => languageSelectVisible = true;
