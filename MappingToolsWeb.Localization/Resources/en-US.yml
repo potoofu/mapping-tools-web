@@ -16,6 +16,7 @@ apply: Apply
 backups: Backups
 general: General
 tools: Tools
+saveSettings: Save settings
 
 # 1 tools
 ## 1.0 shared
