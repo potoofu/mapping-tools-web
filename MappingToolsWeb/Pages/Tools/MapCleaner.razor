@@ -31,8 +31,8 @@
         <MudCheckBox @bind-Checked="@settings.UsesVolumeChangesInSpinners" Label="@i18n["tools_mapCleaner_usesVolumeChangesInSpinners"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
         <MudCheckBox @bind-Checked="@settings.UsesSampleSetChanges" Label="@i18n["tools_mapCleaner_usesSampleSetChanges"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
 
-        <MudSelect ToStringFunc="@signatureConverter" Class="mt-4" AdornmentColor="Color.Secondary" T="Signature" Label="@i18n["signatures"]" HelperText="@i18n["tools_mapCleaner_signatureHelpText"]" MultiSelection="true" @bind-SelectedValues="@settings.SelectedSignatures">
-            @foreach (var sig in Signatures) {
+        <MudSelect ToStringFunc="@beatDivisorStringFunction" Class="mt-4" AdornmentColor="Color.Secondary" T="BeatDivisor" Label="@i18n["beatDivisors"]" HelperText="@i18n["tools_mapCleaner_beatDivisorHelpText"]" MultiSelection="true" @bind-SelectedValues="@settings.SelectedBeatDivisors">
+            @foreach (var sig in BeatDivisor.AllDivisors) {
                 <MudSelectItem Value="sig"></MudSelectItem>
             }
         </MudSelect>
@@ -41,7 +41,7 @@
         <MudPaper Class="mt-16">
             <div class="d-flex ma-5">
                 @if (beatmaps.Count > 0) {
-                    <MudSelect AdornmentColor="Color.Secondary" T="IFileRecord" Label="Beatmaps" HelperText="@i18n["tools_mapCleaner_signatureHelpText"]" @bind-Value="selectedBeatmap">
+                    <MudSelect AdornmentColor="Color.Secondary" T="IFileRecord" Label="Beatmaps" HelperText="@i18n["tools_shared_beatmapSelectHelpText"]" @bind-Value="selectedBeatmap">
                         @foreach (var map in beatmaps) {
                             <MudSelectItem Value="map">@map.Name</MudSelectItem>
                         }
@@ -66,10 +66,10 @@
     [Inject] IndexedDBManager indexedDb { get; set; }
     [Inject] IBlazorDownloadFileService downloadService { get; set; }
 
-    Func<Signature, string> signatureConverter = o => o.DisplayName;
-
     double cleanerProgress = 0;
     Color progressColor = Color.Primary;
+
+    Func<BeatDivisor, string> beatDivisorStringFunction = (b) => b.DisplayName;
 
     public const string STORAGE_KEY = "settings.map_cleaner";
     MapCleanerSettingsModel settings = new MapCleanerSettingsModel();
@@ -94,19 +94,19 @@
         StateHasChanged();
 
         if (selectedBeatmap?.Data == null) {
-            SnackBar.Add("Could not find any beatmap data!", Severity.Error);
+            SnackBar.Add(i18n["tools_shared_noBeatmapData"], Severity.Error);
             return;
         }
 
-        if (settings.SelectedSignatures.Count() < 1) {
-            SnackBar.Add("Please select at least 1 beat signature!", Severity.Warning);
+        if (settings.SelectedBeatDivisors.Count() < 1) {
+            SnackBar.Add(i18n["tools_shared_noBeatDivisors"], Severity.Warning);
             return;
         }
 
         var data = Encoding.UTF8.GetString(selectedBeatmap.Data, 0, selectedBeatmap.Data.Length);
 
         if (string.IsNullOrWhiteSpace(data)) {
-            SnackBar.Add("Could not convert beatmap bytes to string!", Severity.Error);
+            SnackBar.Add(i18n["tools_shared_beatmapStringEncodeError"], Severity.Error);
             return;
         }
 
@@ -125,7 +125,7 @@
                 settings.ResnapBookmarks,
                 settings.RemoveMuting,
                 settings.RemoveUnclickables,
-                settings.SelectedSignatures.Select(o => new RationalBeatDivisor(o.Numerator, o.Denominator))
+                settings.SelectedBeatDivisors.Select(o => new RationalBeatDivisor(o.Numerator, o.Denominator))
             );
 
             var res = toolNamespace.MapCleaner.CleanMap(beatmap, args);
@@ -170,10 +170,10 @@
 
             progress.ProgressChanged += OnDownloadProgressChanged;
 
-            await downloadService.DownloadFile(newFileRecord.Name, newFileRecord.Data, 32786, "application/octet-stream", progress);
+            await downloadService.DownloadFile(newFileRecord.Name, newFileRecord.Data, progress: progress);
         }
         catch (BeatmapParsingException) {
-            SnackBar.Add("Could not parse beatmap data!", Severity.Error);
+            SnackBar.Add(i18n["tools_shared_beatmapParseError"], Severity.Error);
         }
         catch (Exception e) {
             SnackBar.Add(e.Message + "\n" + e.StackTrace, Severity.Error);
@@ -218,78 +218,4 @@
 
         StateHasChanged();
     }
-
-    public class Signature {
-        public string DisplayName { get; set; }
-        public int Numerator { get; set; }
-        public int Denominator { get; set; }
-    }
-
-    public static Signature[] Signatures = {
-        new Signature {
-            DisplayName = "1/1",
-            Numerator = 1,
-            Denominator = 1
-        },
-        new Signature {
-            DisplayName = "1/2",
-            Numerator = 1,
-            Denominator = 2
-        },
-        new Signature {
-            DisplayName = "1/3",
-            Numerator = 1,
-            Denominator = 3
-        },
-        new Signature {
-            DisplayName = "1/4",
-            Numerator = 1,
-            Denominator = 4
-        },
-        new Signature {
-            DisplayName = "1/6",
-            Numerator = 1,
-            Denominator = 6
-        },
-        new Signature {
-            DisplayName = "1/8",
-            Numerator = 1,
-            Denominator = 8
-        },
-        new Signature {
-            DisplayName = "1/12",
-            Numerator = 1,
-            Denominator = 12
-        },
-        new Signature {
-            DisplayName = "1/16",
-            Numerator = 1,
-            Denominator = 16
-        },
-        new Signature {
-            DisplayName = "1/5",
-            Numerator = 1,
-            Denominator = 5
-        },
-        new Signature {
-            DisplayName = "1/7",
-            Numerator = 1,
-            Denominator = 7
-        },
-        new Signature {
-            DisplayName = "1/9",
-            Numerator = 1,
-            Denominator = 9
-        },
-        new Signature {
-            DisplayName = "1/11",
-            Numerator = 1,
-            Denominator = 11
-        },
-        new Signature {
-            DisplayName = "1/13",
-            Numerator = 1,
-            Denominator = 13
-        }
-    };
 }

@@ -3,7 +3,7 @@ basic: Basic
 advanced: Advanced
 404: There seems to be nothing at this address...
 changelog: Changelog
-signatures: Signatures
+beatDivisors: Beat divisors
 changeLanguage: Change language
 settings: Settings
 name: Name
@@ -21,6 +21,11 @@ saveSettings: Save settings
 # 1 tools
 ## 1.0 shared
 tools_shared_noBeatmap: Could not find any beatmaps.
+tools_shared_beatmapSelectHelpText: Select a beatmap.
+tools_shared_noBeatmapData: Could not find any beatmap data!
+tools_shared_noBeatDivisors: Please select at least 1 beat divisor!
+tools_shared_beatmapStringEncodeError: Could not convert beatmap bytes to string!
+tools_shared_beatmapParseError: Could not parse beatmap data!
 ## 1.1 map cleaner
 tools_mapCleaner_resnapObjects: Resnap objects
 tools_mapCleaner_resnapBookmarks: Resnap bookmarks
@@ -30,7 +35,7 @@ tools_mapCleaner_removeUnclickables: Remove unclickables
 tools_mapCleaner_usesVolumeChangesInSliders: Uses volume changes in sliders?
 tools_mapCleaner_usesVolumeChangesInSpinners: Uses volume changes in spinners?
 tools_mapCleaner_usesSampleSetChanges: Uses sample set changes?
-tools_mapCleaner_signatureHelpText: Pick relevant signatures
+tools_mapCleaner_beatDivisorHelpText: Pick relevant beat divisors
 tools_mapCleaner_docsHeader: Documentation for Map Cleaner
 
 # 2 standalone components

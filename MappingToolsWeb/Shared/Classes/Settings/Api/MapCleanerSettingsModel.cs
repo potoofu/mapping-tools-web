@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using static MappingToolsWeb.Pages.Tools.MapCleaner;
 
 namespace MappingToolsWeb.Shared.Classes.Settings.Api {
 
@@ -13,6 +12,6 @@ namespace MappingToolsWeb.Shared.Classes.Settings.Api {
         public bool UsesSampleSetChanges { get; set; }
         public bool UsesVolumeChangesInSpinners { get; set; }
 
-        public HashSet<Signature> SelectedSignatures { get; set; } = new HashSet<Signature>();
+        public HashSet<BeatDivisor> SelectedBeatDivisors { get; set; } = new HashSet<BeatDivisor>();
     }
 }
