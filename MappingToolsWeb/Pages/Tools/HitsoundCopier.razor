@@ -1,0 +1,271 @@
+﻿@page "/hitsoundcopier"
+
+@using BlazorDownloadFile
+@using MappingToolsWeb.Shared.Classes.Settings.Api
+@using MappingToolsWeb.Shared.Components.Tools
+@using MappingToolsWeb.Shared.Components.Tools.HitsoundCopier
+@using Mapping_Tools_Core.BeatmapHelper.BeatDivisors
+@using Mapping_Tools_Core.BeatmapHelper.Enums
+@using Mapping_Tools_Core.BeatmapHelper.IO.Decoding
+@using Mapping_Tools_Core.BeatmapHelper.IO.Encoding
+@using Mapping_Tools_Core.Exceptions
+@using toolNamespace = Mapping_Tools_Core.Tools.HitsoundCopierStuff
+@using System.Text
+@using TG.Blazor.IndexedDB
+
+<ToolBase Name="Hitsound Copier" DocsPath="@($"docs/{ i18n.CurrentCulture.Name }/hitsound_copier.md")">
+    <Settings>
+        <HitsoundCopierSettings />
+    </Settings>
+
+    <ActionElement>
+        <MudPaper>
+            <div class="d-flex ma-5">
+                @if (beatmaps.Count > 0) {
+                    <div class="d-flex flex-column flex-grow-1">
+                        <MudSelect AdornmentColor="Color.Secondary" T="IFileRecord" Label="@i18n["tools_hitsoundCopier_sourceBeatmap"]" HelperText="@i18n["tools_hitsoundCopier_beatmapSelectFromHelpText"]" @bind-Value="selectedFromBeatmap">
+                            @foreach (var map in beatmaps) {
+                                <MudSelectItem Value="map">@map.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudSelect AdornmentColor="Color.Secondary" T="IFileRecord" Label="@i18n["tools_hitsoundCopier_destinationBeatmap"]" HelperText="@i18n["tools_hitsoundCopier_beatmapSelectToHelpText"]" @bind-Value="selectedToBeatmap">
+                            @foreach (var map in beatmaps) {
+                                <MudSelectItem Value="map">@map.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </div>
+                    <MudButton EndIcon="@Icons.Material.Filled.DoubleArrow" Color="Color.Secondary" OnClick="RunTool" Size="Size.Large" Class="my-5 ml-5">Run</MudButton>
+                }
+                else {
+                    <MudText Color="Color.Secondary" Typo="Typo.subtitle1">@i18n["tools_shared_noBeatmap"]</MudText>
+                }
+            </div>
+            <MudProgressLinear Value="@copierProgress" Color="@progressColor" />
+        </MudPaper>
+    </ActionElement>
+    <Content>
+        <MudNumericField @bind-Value="@settings.TemporalLeniency" Label="@i18n["tools_hitsoundCopier_temporalLeniency"]" AdornmentColor="Color.Secondary" Variant="Variant.Text" Min="0" Class="d-flex" />
+        <MudCheckBox @bind-Checked="@settings.CopyHitsounds" Label="@i18n["tools_hitsoundCopier_copyHitsounds"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@settings.CopySliderbodyHitsounds" Label="@i18n["tools_hitsoundCopier_copySliderBody"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@settings.CopySampleSets" Label="@i18n["tools_hitsoundCopier_copySampleSets"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@settings.CopyVolumes" Label="@i18n["tools_hitsoundCopier_copyVolumes"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@settings.AlwaysPreserve5Volume" Label="@i18n["tools_hitsoundCopier_alwaysPreserve5Volume"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@settings.CopyStoryboardedSamples" Label="@i18n["tools_hitsoundCopier_copyStoryboardSamples"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <!--<MudCheckBox @bind-Checked="@settings.IgnoreHitsoundSatisfiedSamples" Disabled="@(!settings.CopyStoryboardedSamples)" Label="@i18n["tools_hitsoundCopier_ignoreHitsoundSatisfied"]" Color="Color.Secondary" Class="d-flex ml-5"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@settings.CopyToSliderTicks" Label="@i18n["tools_hitsoundCopier_copyToSliderTicks"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+        <MudCheckBox @bind-Checked="@settings.CopyToSliderSlides" Label="@i18n["tools_hitsoundCopier_copyToSliderSlides"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>-->
+        <MudCheckBox @bind-Checked="@settings.MuteSliderends" Label="@i18n["tools_hitsoundCopier_muteSliderends"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
+
+        <MudPaper Class="d-flex flex-column pa-5">
+            <MudText Typo="Typo.subtitle1">@i18n["tools_hitsoundCopier_mutingFilter"]</MudText>
+            <div Class="d-flex flex-row flex-wrap">
+                <MudSelect Class="mx-2" AdornmentColor="Color.Secondary" T="BeatDivisor" Label="@i18n["beatDivisors"]" HelperText="@i18n["tools_hitsoundCopier_allBeatDivisors"]" MultiSelection="true" @bind-SelectedValues="@settings.AllBeatDivisors">
+                    @foreach (var sig in BeatDivisor.AllDivisors) {
+                        <MudSelectItem Value="sig"></MudSelectItem>
+                    }
+                </MudSelect>
+                <MudSelect Class="mx-2" AdornmentColor="Color.Secondary" T="BeatDivisor" Label="@i18n["beatDivisors"]" HelperText="@i18n["tools_hitsoundCopier_mutedBeatDivisors"]" MultiSelection="true" @bind-SelectedValues="@settings.MutedBeatDivisors">
+                    @foreach (var sig in BeatDivisor.AllDivisors) {
+                        <MudSelectItem Value="sig"></MudSelectItem>
+                    }
+                </MudSelect>
+                <MudNumericField Class="mx-2" AdornmentColor="Color.Secondary" @bind-Value="@settings.MinimumDuration" Label="@i18n["tools_hitsoundCopier_minimumDuration"]" Variant="Variant.Text" HideSpinButtons="true" Min="0" />
+            </div>
+            <MudText Typo="Typo.subtitle1">@i18n["tools_hitsoundCopier_mutedConfig"]</MudText>
+            <div Class="d-flex flex-row flex-wrap">
+                <MudNumericField Class="mx-2" AdornmentColor="Color.Secondary" @bind-Value="@settings.MutedSampleIndex" Label="@i18n["tools_hitsoundCopier_mutedSampleIndex"]" Variant="Variant.Text" Min="-1" />
+                <MudSelect Class="mx-2" AdornmentColor="Color.Secondary" T="SampleSet" Label="@i18n["tools_hitsoundCopier_mutedSampleSet"]" @bind-Value="@settings.MutedSampleSet">
+                    @foreach (var ss in sampleSets) {
+                        <MudSelectItem Value="ss"></MudSelectItem>
+                    }
+                </MudSelect>
+            </div>
+        </MudPaper>
+    </Content>
+</ToolBase>
+
+@code {
+    [Inject] ILanguageContainerService i18n { get; set; }
+    [Inject] INestedIndexedDbCache<ContentTag, IOrderedRecords<IFileRecord>, IFileRecord> fileCache { get; set; }
+    [Inject] IMappingToolsSettingsService mtSettings { get; set; }
+    [Inject] ISnackbar SnackBar { get; set; }
+    [Inject] IndexedDBManager indexedDb { get; set; }
+    [Inject] IBlazorDownloadFileService downloadService { get; set; }
+
+    SampleSet[] sampleSets = { SampleSet.None, SampleSet.Normal, SampleSet.Soft, SampleSet.Drum };
+
+    double copierProgress = 0;
+    Color progressColor = Color.Primary;
+
+    public const string STORAGE_KEY = "settings.hitsound_copier";
+    HitsoundCopierSettingsModel settings = new HitsoundCopierSettingsModel();
+
+    IFileRecord selectedFromBeatmap;
+    IFileRecord selectedToBeatmap;
+    List<IFileRecord> beatmaps = new List<IFileRecord>();
+
+    protected override async Task OnInitializedAsync() {
+        fileCache.CacheHasChanged += OnCacheChanged;
+
+        i18n.InitLocalizedComponent(this);
+
+        LoadBeatmaps();
+        
+        settings = await mtSettings.GetSettingsAsync<HitsoundCopierSettingsModel>(STORAGE_KEY);
+    }
+
+    async Task RunTool() {
+        progressColor = Color.Primary;
+        copierProgress = 0;
+
+        StateHasChanged();
+
+        if (selectedToBeatmap?.Data == null || selectedFromBeatmap?.Data == null) {
+            SnackBar.Add(i18n["tools_shared_noBeatmapData"], Severity.Error);
+            return;
+        }
+
+        if (settings.MuteSliderends && settings.AllBeatDivisors.Count() < 1) {
+            SnackBar.Add(i18n["tools_shared_noBeatDivisors"], Severity.Warning);
+            return;
+        }
+
+        var dataFrom = Encoding.UTF8.GetString(selectedFromBeatmap.Data, 0, selectedFromBeatmap.Data.Length);
+        var dataTo = Encoding.UTF8.GetString(selectedToBeatmap.Data, 0, selectedToBeatmap.Data.Length);
+
+        if (string.IsNullOrWhiteSpace(dataFrom) || string.IsNullOrWhiteSpace(dataTo)) {
+            SnackBar.Add(i18n["tools_shared_beatmapStringEncodeError"], Severity.Error);
+            return;
+        }
+
+        await UpdateProgress(10);
+
+        try {
+            var decoder = new OsuBeatmapDecoder();
+            var beatmapFrom = decoder.Decode(dataFrom);
+            var beatmapTo = decoder.Decode(dataTo);
+
+            await UpdateProgress(30);
+
+            var copier = new toolNamespace.HitsoundCopier();
+            copier.TemporalLeniency = settings.TemporalLeniency;
+            copier.DoCopyHitsounds = settings.CopyHitsounds;
+            copier.DoCopyBodyHitsounds = settings.CopySliderbodyHitsounds;
+            copier.DoCopySampleSets = settings.CopySampleSets;
+            copier.DoCopyVolumes = settings.CopyVolumes;
+            copier.AlwaysPreserve5Volume = settings.AlwaysPreserve5Volume;
+            copier.DoCopyToSliderTicks = settings.CopyToSliderTicks;
+            copier.DoCopyToSliderSlides = settings.CopyToSliderSlides;
+
+            copier.CopyHitsoundsBasic(beatmapFrom, beatmapTo, out var processedTimeline);
+            
+            if (settings.CopyStoryboardedSamples) {
+                copier.CopyStoryboardedSamples(beatmapFrom, beatmapTo, true);
+            }
+
+            if (settings.MuteSliderends) {
+                var muter = new toolNamespace.SliderendSilencer();
+                muter.BeatDivisors = settings.AllBeatDivisors.Select(o => new RationalBeatDivisor(o.Numerator, o.Denominator)).ToArray();
+                muter.MutedDivisors = settings.MutedBeatDivisors.Select(o => new RationalBeatDivisor(o.Numerator, o.Denominator)).ToArray();
+                muter.MinLength = settings.MinimumDuration;
+                muter.MutedIndex = settings.MutedSampleIndex;
+                muter.MutedSampleSet = settings.MutedSampleSet;
+
+                muter.MuteSliderends(beatmapTo, processedTimeline);
+            }
+
+            await UpdateProgress(50);
+
+            var encoded = new OsuBeatmapEncoder().Encode(beatmapTo);
+
+            await UpdateProgress(60);
+
+            await indexedDb.AddRecord(new StoreRecord<IBackupRecord> {
+                Storename = "backups",
+                Data = new BackupRecord
+                {
+                    File = selectedToBeatmap as FileRecord, // !!!! workaround for shit language not being able to use interfaces smh
+                    ToolName = "Hitsound Copier",
+                    BackedUpOn = DateTime.Now
+                }
+            });
+
+            await UpdateProgress(70);
+
+            var newFileRecord = new FileRecord {
+                Id = selectedToBeatmap.Id,
+                Name = selectedToBeatmap.Name,
+                Tag = selectedToBeatmap.Tag,
+                Data = Encoding.UTF8.GetBytes(encoded),
+                LastModified = DateTime.Now
+            };
+
+            await fileCache.ReplaceAsync(selectedToBeatmap, newFileRecord);
+
+           await  UpdateProgress(90);
+
+            var snackBarString = "Successfully copied hitsounds!";
+
+            SnackBar.Add(snackBarString, Severity.Success);
+
+            var progress = new Progress<double>();
+
+            progress.ProgressChanged += OnDownloadProgressChanged;
+
+            await downloadService.DownloadFile(newFileRecord.Name, newFileRecord.Data, progress: progress);
+        }
+        catch (BeatmapParsingException) {
+            SnackBar.Add(i18n["tools_shared_beatmapParseError"], Severity.Error);
+        }
+        catch (Exception e) {
+            SnackBar.Add(e.Message + "\n" + e.StackTrace, Severity.Error);
+        }
+    }
+
+    async void OnDownloadProgressChanged(object sender, double progress) {
+        await UpdateProgress(100);
+    }
+
+    async Task UpdateProgress(double progress) {
+        if (progress == 100) {
+            progressColor = Color.Success;
+            copierProgress = 100;
+
+            StateHasChanged();
+
+            await Task.Delay(3000);
+
+            copierProgress = 0;
+            progressColor = Color.Primary;
+        }
+        else {
+            copierProgress = progress;
+        }
+
+        StateHasChanged();
+    }
+
+    void LoadBeatmaps() {
+        if (fileCache.TryGetValue(ContentTag.OsuBeatmap, out var maps)) {
+            beatmaps = maps.OrderedRecords;
+        }
+        else
+        {
+            beatmaps = new List<IFileRecord>();
+        }
+
+        if (!beatmaps.Contains(selectedToBeatmap)) {
+            selectedToBeatmap = null;
+        }
+
+        if (!beatmaps.Contains(selectedFromBeatmap)) {
+            selectedFromBeatmap = null;
+        }
+    }
+
+    void OnCacheChanged(object sender, EventArgs e) {
+        LoadBeatmaps();
+
+        StateHasChanged();
+    }
+}

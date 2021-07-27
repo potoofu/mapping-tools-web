@@ -16,7 +16,25 @@
     <Settings>
         <MapCleanerSettings />
     </Settings>
-
+    
+    <ActionElement>
+        <MudPaper>
+            <div class="d-flex ma-5">
+                @if (beatmaps.Count > 0) {
+                    <MudSelect AdornmentColor="Color.Secondary" T="IFileRecord" Label="Beatmaps" HelperText="@i18n["tools_shared_beatmapSelectHelpText"]" @bind-Value="selectedBeatmap">
+                        @foreach (var map in beatmaps) {
+                            <MudSelectItem Value="map">@map.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudButton EndIcon="@Icons.Material.Filled.DoubleArrow" Color="Color.Secondary" OnClick="RunTool" Size="Size.Large" Class="my-5 ml-5">Run</MudButton>
+                }
+                else {
+                    <MudText Color="Color.Secondary" Typo="Typo.subtitle1">@i18n["tools_shared_noBeatmap"]</MudText>
+                }
+            </div>
+            <MudProgressLinear Value="@cleanerProgress" Color="@progressColor" />
+        </MudPaper>
+    </ActionElement>
     <Content>
         <MudText Typo="Typo.subtitle1" Class="mt-8">@i18n["basic"]</MudText>
 
@@ -31,31 +49,12 @@
         <MudCheckBox @bind-Checked="@settings.UsesVolumeChangesInSpinners" Label="@i18n["tools_mapCleaner_usesVolumeChangesInSpinners"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
         <MudCheckBox @bind-Checked="@settings.UsesSampleSetChanges" Label="@i18n["tools_mapCleaner_usesSampleSetChanges"]" Color="Color.Secondary" Class="d-flex"></MudCheckBox>
 
-        <MudSelect ToStringFunc="@beatDivisorStringFunction" Class="mt-4" AdornmentColor="Color.Secondary" T="BeatDivisor" Label="@i18n["beatDivisors"]" HelperText="@i18n["tools_mapCleaner_beatDivisorHelpText"]" MultiSelection="true" @bind-SelectedValues="@settings.SelectedBeatDivisors">
+        <MudSelect Class="mt-4" AdornmentColor="Color.Secondary" T="BeatDivisor" Label="@i18n["beatDivisors"]" HelperText="@i18n["tools_mapCleaner_beatDivisorHelpText"]" MultiSelection="true" @bind-SelectedValues="@settings.SelectedBeatDivisors">
             @foreach (var sig in BeatDivisor.AllDivisors) {
                 <MudSelectItem Value="sig"></MudSelectItem>
             }
         </MudSelect>
     </Content>
-    <ActionElement>
-        <MudPaper Class="mt-16">
-            <div class="d-flex ma-5">
-                @if (beatmaps.Count > 0) {
-                    <MudSelect AdornmentColor="Color.Secondary" T="IFileRecord" Label="Beatmaps" HelperText="@i18n["tools_shared_beatmapSelectHelpText"]" @bind-Value="selectedBeatmap">
-                        @foreach (var map in beatmaps) {
-                            <MudSelectItem Value="map">@map.Name</MudSelectItem>
-                        }
-                    </MudSelect>
-                    <MudButton EndIcon="@Icons.Material.Filled.DoubleArrow" Color="Color.Secondary" OnClick="RunTool" Size="Size.Large" Class="my-5 ml-5">Run</MudButton>
-                }
-                else {
-                    <MudText Color="Color.Secondary" Typo="Typo.subtitle1">@i18n["tools_shared_noBeatmap"]</MudText>
-                    selectedBeatmap = null;
-                }
-            </div>
-            <MudProgressLinear Value="@cleanerProgress" Color="@progressColor" />
-        </MudPaper>
-    </ActionElement>
 </ToolBase>
 
 @code {
@@ -68,8 +67,6 @@
 
     double cleanerProgress = 0;
     Color progressColor = Color.Primary;
-
-    Func<BeatDivisor, string> beatDivisorStringFunction = (b) => b.DisplayName;
 
     public const string STORAGE_KEY = "settings.map_cleaner";
     MapCleanerSettingsModel settings = new MapCleanerSettingsModel();
@@ -210,6 +207,10 @@
         else
         {
             beatmaps = new List<IFileRecord>();
+        }
+
+        if (!beatmaps.Contains(selectedBeatmap)) {
+            selectedBeatmap = null;
         }
     }
 

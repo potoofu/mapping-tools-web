@@ -37,6 +37,32 @@ tools_mapCleaner_usesVolumeChangesInSpinners: Uses volume changes in spinners?
 tools_mapCleaner_usesSampleSetChanges: Uses sample set changes?
 tools_mapCleaner_beatDivisorHelpText: Pick relevant beat divisors
 tools_mapCleaner_docsHeader: Documentation for Map Cleaner
+## 1.2 hitsound copier
+tools_hitsoundCopier_beatmapSelectFromHelpText: Select a beatmap to copy from.
+tools_hitsoundCopier_beatmapSelectToHelpText: Select a beatmap to copy to.
+tools_hitsoundCopier_sourceBeatmap: Source
+tools_hitsoundCopier_destinationBeatmap: Destination
+tools_hitsoundCopier_copyingMode: Copying mode
+tools_hitsoundCopier_temporalLeniency: Temporal leniency
+tools_hitsoundCopier_copyHitsounds: Copy hitsounds
+tools_hitsoundCopier_copySliderBody: Copy sliderbody hitsounds
+tools_hitsoundCopier_copySampleSets: Copy samplesets
+tools_hitsoundCopier_copyVolumes: Copy volumes
+tools_hitsoundCopier_alwaysPreserve5Volume: Always preserve 5% volume
+tools_hitsoundCopier_copyStoryboardSamples: Copy storyboarded samples
+tools_hitsoundCopier_ignoreHitsoundSatisfied: Ignore samples satisfied by hitsounds
+tools_hitsoundCopier_copyToSliderTicks: Copy to slider ticks
+tools_hitsoundCopier_copyToSliderSlides: Copy to slider slides
+tools_hitsoundCopier_muteSliderends: Mute sliderends
+tools_hitsoundCopier_mutingFilter: Sliderend muting filter
+tools_hitsoundCopier_allBeatDivisors: All beat divisors
+tools_hitsoundCopier_mutedBeatDivisors: Muted beat divisors
+tools_hitsoundCopier_minimumDuration: Minimum duration
+tools_hitsoundCopier_mutedConfig: Muted config
+tools_hitsoundCopier_mutedSampleIndex: Sample index
+tools_hitsoundCopier_mutedSampleSet: Sample set
+tools_hitsoundCopier_overwriteEverything: Overwrite everything
+tools_hitsoundCopier_overwriteDefined: Overwrite only defined
 
 # 2 standalone components
 ## 2.0 shared

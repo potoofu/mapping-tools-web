@@ -1,0 +1,26 @@
+﻿@inject ILanguageContainerService I18n
+@inject IMappingToolsSettingsService mtSettings
+
+@using MappingToolsWeb.Shared.Classes.Settings.Api
+@using Mapping_Tools_Core.BeatmapHelper.BeatDivisors
+
+<div>
+    <div class="d-flex justify-flex-end">
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Class="ml-auto" Variant="Variant.Filled"  OnClick="WriteSettings">@I18n["saveSettings"]</MudButton>
+    </div>
+</div>
+
+@code {
+    public const string STORAGE_KEY = "settings.hitsound_copier";
+    HitsoundCopierSettingsModel settings = new HitsoundCopierSettingsModel();
+
+    protected override async void OnInitialized() {
+        I18n.InitLocalizedComponent(this);
+        
+        settings = await mtSettings.GetSettingsAsync<HitsoundCopierSettingsModel>(STORAGE_KEY);
+    }
+
+    async Task WriteSettings() {
+        await mtSettings.WriteToLocalStorageAsync<HitsoundCopierSettingsModel>(STORAGE_KEY);
+    }
+}
