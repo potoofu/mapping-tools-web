@@ -1,0 +1,74 @@
+﻿@using MappingToolsWeb.Shared.Classes.Settings.Api
+@using Mapping_Tools_Core.BeatmapHelper.BeatDivisors
+
+<div>
+    <div class="d-flex ma-5">
+        @if (beatmaps.Count > 0) {
+            <div class="d-flex flex-column flex-grow-1">
+                <MudSelect AdornmentColor="Color.Secondary" T="IFileRecord" Label="@i18n["beatmap"]" HelperText="@i18n["tools_shared_beatmapSelectHelpText"]" @bind-Value="selectedBeatmap">
+                    @foreach (var map in beatmaps) {
+                        <MudSelectItem Value="map">@map.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </div>
+            <MudButton EndIcon="@Icons.Material.Filled.DoubleArrow" Color="Color.Secondary" OnClick="RunTool" Size="Size.Large" Class="my-5 ml-5">Run</MudButton>
+        }
+        else {
+            <MudText Color="Color.Secondary" Typo="Typo.subtitle1">@i18n["tools_shared_noBeatmap"]</MudText>
+        }
+    </div>
+    <MudHidden IsHidden="@canRun">
+        <MudProgressLinear Indeterminate="@(!canRun)" Color="Color.Secondary" />
+    </MudHidden>
+    
+</div>
+
+@code {
+    [Inject] ILanguageContainerService i18n { get; set; }
+    [Inject] INestedIndexedDbCache<ContentTag, IOrderedRecords<IFileRecord>, IFileRecord> fileCache { get; set; }
+
+    [Parameter]
+    public Func<IFileRecord, Task> Run { get; set; }
+
+    bool canRun = true;
+
+    IFileRecord selectedBeatmap;
+    List<IFileRecord> beatmaps = new List<IFileRecord>();
+
+    protected override void OnInitialized() {
+        fileCache.CacheHasChanged += OnCacheChanged;
+
+        i18n.InitLocalizedComponent(this);
+
+        LoadBeatmaps();
+    }
+
+    async Task RunTool() {
+        if (canRun) {
+            canRun = false;
+            StateHasChanged();
+            await Run(selectedBeatmap);
+            canRun = true;
+            StateHasChanged();
+        }
+    }
+
+    void LoadBeatmaps() {
+        if (fileCache.TryGetValue(ContentTag.OsuBeatmap, out var maps)) {
+            beatmaps = maps.OrderedRecords;
+        }
+        else {
+            beatmaps = new List<IFileRecord>();
+        }
+
+        if (!beatmaps.Contains(selectedBeatmap)) {
+            selectedBeatmap = null;
+        }
+    }
+
+    void OnCacheChanged(object sender, EventArgs e) {
+        LoadBeatmaps();
+
+        StateHasChanged();
+    }
+}

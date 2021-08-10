@@ -39,17 +39,17 @@
         </MudPaper>
     </ActionElement>
     <Content>
-        <MudTable Items="@settings.Project.ColourPoints" Hover="true" @bind-SelectedItem="selectedItem" SortLabel="Sort By"
-         CommitEditTooltip="Commit Edit">
+        <MudTable Items="@settings.Project.ColourPoints" Hover="true" Dense="true" @bind-SelectedItem="selectedItem" SortLabel="@i18n["sortBy"]"
+         CommitEditTooltip="@i18n["commitEdit"]">
             <ColGroup>
                 <col style="width:140px;" />
                 <col style="width:140px;" />
                 <col style="width:50%;" />
             </ColGroup>
             <HeaderContent>
-                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ColourPoint, object>(x=>x.Time)">Time</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<ColourPoint, object>(x=>x.Mode)">Mode</MudTableSortLabel></MudTh>
-                <MudTh>Colour Sequence</MudTh>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ColourPoint, object>(x=>x.Time)">@i18n["tools_comboColourStudio_time"]</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ColourPoint, object>(x=>x.Mode)">@i18n["tools_comboColourStudio_mode"]</MudTableSortLabel></MudTh>
+                <MudTh>@i18n["tools_comboColourStudio_colourSequence"]</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Time">@context.Time</MudTd>
@@ -85,8 +85,8 @@
         </MudTable>
 
         <div class="d-flex flex-row mt5">
-            <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="AddColourPoint" Size="Size.Medium" Class="ma-5">Add</MudButton>
-            <MudButton EndIcon="@Icons.Material.Filled.Remove" Color="Color.Primary" OnClick="RemoveColourPoint" Size="Size.Medium" Class="ma-5">Remove</MudButton>
+            <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="AddColourPoint" Size="Size.Medium" Class="ma-5">@i18n["add"]</MudButton>
+            <MudButton EndIcon="@Icons.Material.Filled.Remove" Color="Color.Primary" OnClick="RemoveColourPoint" Size="Size.Medium" Class="ma-5">@i18n["remove"]</MudButton>
         </div>
 
         <MudPaper Class="d-flex flex-column pa-5">
@@ -99,9 +99,38 @@
             <MudTextField Label="Combo Color Picker" T="string" Value="_pickerColor" ValueChanged="UpdateSelectedColor" Style="@($"color: {_pickerColor};")" />
         </MudPaper>        
         <div class="d-flex flex-row mt5">
-            <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="AddComboColour" Size="Size.Medium" Class="ma-5">Add</MudButton>
-            <MudButton EndIcon="@Icons.Material.Filled.Remove" Color="Color.Primary" OnClick="RemoveComboColour" Size="Size.Medium" Class="ma-5">Remove</MudButton>
+            <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="AddComboColour" Size="Size.Medium" Class="ma-5">@i18n["add"]</MudButton>
+            <MudButton EndIcon="@Icons.Material.Filled.Remove" Color="Color.Primary" OnClick="RemoveComboColour" Size="Size.Medium" Class="ma-5">@i18n["remove"]</MudButton>
         </div>
+            
+        <div class="d-flex flex-row mt5">
+            <MudNumericField @bind-Value="@settings.Project.MaxBurstLength" Min="1" Class="ma-5" Label="@i18n["tools_comboColourStudio_maxBurstLength"]"/>
+            <MudButton Color="Color.Secondary" StartIcon="@Icons.Material.Filled.FileUpload" Class="ml-auto ma-5" Variant="Variant.Filled" OnClick="OnImportColoursClick">@i18n["tools_comboColourStudio_importColours"]</MudButton>
+            <MudButton Color="Color.Secondary" StartIcon="@Icons.Material.Filled.FileUpload" Class="ml-auto ma-5" Variant="Variant.Filled" OnClick="OnImportColorhaxClick">@i18n["tools_comboColourStudio_importColorhax"]</MudButton>
+        </div>
+
+        <MudDialog @bind-IsVisible="colourImportVisible" DisableSidePadding="true">
+            <TitleContent>
+                <MudText Typo="Typo.h5" Class="mr-12">@i18n["tools_comboColourStudio_importColours"]</MudText>
+            </TitleContent>
+            <DialogContent>
+                <MudContainer Style="min-width: 600px; overflow-y: scroll">
+                    <BeatmapSelectDialog Run="@ImportColours"/>
+                </MudContainer>
+            </DialogContent>
+        </MudDialog>
+
+        <MudDialog @bind-IsVisible="colorhaxImportVisible" DisableSidePadding="true">
+            <TitleContent>
+                <MudText Typo="Typo.h5" Class="mr-12">@i18n["tools_comboColourStudio_importColorhax"]</MudText>
+            </TitleContent>
+            <DialogContent>
+                <MudContainer Style="min-width: 600px; overflow-y: scroll">
+                    <BeatmapSelectDialog Run="@ImportColorhax"/>
+                </MudContainer>
+            </DialogContent>
+        </MudDialog>
+        
     </Content>
 </ToolBase>
 
@@ -139,8 +168,12 @@
     MudChip selectedColourItem = null;
     void ChangeSelectedColor(MudChip item) {
         selectedColourItem = item;
-        selectedColour = int.Parse(item.Text)-1;
-        _pickerColor = settings.Project.ComboColours[selectedColour].ToString();
+        if (item != null) {
+            selectedColour = int.Parse(item.Text)-1;
+            _pickerColor = settings.Project.ComboColours[selectedColour].ToString();
+        } else {
+            _pickerColor = string.Empty;
+        }
     }
     void UpdateSelectedColor(string value) {
         _pickerColor = value;
@@ -182,7 +215,7 @@
 
         StateHasChanged();
 
-        if (selectedBeatmap?.Data == null || selectedBeatmap?.Data == null) {
+        if (selectedBeatmap?.Data == null) {
             SnackBar.Add(i18n["tools_shared_noBeatmapData"], Severity.Error);
             return;
         }
@@ -232,14 +265,12 @@
 
             await fileCache.ReplaceAsync(selectedBeatmap, newFileRecord);
 
-           await  UpdateProgress(90);
+            await  UpdateProgress(90);
 
             var snackBarString = "Successfully exported colours!";
-
             SnackBar.Add(snackBarString, Severity.Success);
 
             var progress = new Progress<double>();
-
             progress.ProgressChanged += OnDownloadProgressChanged;
 
             await downloadService.DownloadFile(newFileRecord.Name, newFileRecord.Data, progress: progress);
@@ -273,6 +304,95 @@
         }
 
         StateHasChanged();
+    }
+
+    void OnImportColoursClick() {
+        colourImportVisible = !colourImportVisible;
+    }
+    
+    bool colourImportVisible = false;
+
+    Task ImportColours(IFileRecord selectedBeatmap) {
+        if (selectedBeatmap?.Data == null) {
+            SnackBar.Add(i18n["tools_shared_noBeatmapData"], Severity.Error);
+            return Task.CompletedTask;
+        }
+
+        var data = Encoding.UTF8.GetString(selectedBeatmap.Data, 0, selectedBeatmap.Data.Length);
+
+        if (string.IsNullOrWhiteSpace(data)) {
+            SnackBar.Add(i18n["tools_shared_beatmapStringEncodeError"], Severity.Error);
+            return Task.CompletedTask;
+        }
+
+        try {
+            var decoder = new OsuBeatmapDecoder();
+            var beatmap = decoder.Decode(data);
+
+            settings.Project.ComboColours.Clear();
+            foreach (var comboColour in beatmap.ComboColoursList) {
+                settings.Project.ComboColours.Add(new ComboColour(comboColour.R, comboColour.G, comboColour.B));
+            }
+
+            var snackBarString = "Successfully imported colours!";
+            SnackBar.Add(snackBarString, Severity.Success);
+        } catch (BeatmapParsingException) {
+            SnackBar.Add(i18n["tools_shared_beatmapParseError"], Severity.Error);
+        } catch (Exception e) {
+            SnackBar.Add(e.Message + "\n" + e.StackTrace, Severity.Error);
+        }
+        return Task.CompletedTask;
+    }
+
+    void OnImportColorhaxClick() {
+        colorhaxImportVisible = !colorhaxImportVisible;
+    }
+    
+    bool colorhaxImportVisible = false;
+
+    Task ImportColorhax(IFileRecord selectedBeatmap) {
+        if (selectedBeatmap?.Data == null) {
+            SnackBar.Add(i18n["tools_shared_noBeatmapData"], Severity.Error);
+            return Task.CompletedTask;
+        }
+
+        var data = Encoding.UTF8.GetString(selectedBeatmap.Data, 0, selectedBeatmap.Data.Length);
+
+        if (string.IsNullOrWhiteSpace(data)) {
+            SnackBar.Add(i18n["tools_shared_beatmapStringEncodeError"], Severity.Error);
+            return Task.CompletedTask;
+        }
+
+        try {
+            var decoder = new OsuBeatmapDecoder();
+            var beatmap = decoder.Decode(data);
+
+            var importer = new toolNamespace.ColourHaxImporter();
+            importer.MaxBurstLength = settings.Project.MaxBurstLength;
+
+            var imported = importer.ImportColourHax(beatmap);
+
+            settings.Project.ColourPoints.Clear();
+            settings.Project.ComboColours.Clear();
+            foreach (var comboColour in imported.ComboColours) {
+                settings.Project.ComboColours.Add(new ComboColour(comboColour.R, comboColour.G, comboColour.B));
+            }
+            foreach (var colourPoint in imported.ColourPoints) {
+                settings.Project.ColourPoints.Add(new ColourPoint {
+                    Time = colourPoint.Time,
+                    Mode = colourPoint.Mode,
+                    ColourSequence = colourPoint.ColourSequence.ToList()
+                });
+            }
+
+            var snackBarString = "Successfully imported colorhax!";
+            SnackBar.Add(snackBarString, Severity.Success);
+        } catch (BeatmapParsingException) {
+            SnackBar.Add(i18n["tools_shared_beatmapParseError"], Severity.Error);
+        } catch (Exception e) {
+            SnackBar.Add(e.Message + "\n" + e.StackTrace, Severity.Error);
+        }
+        return Task.CompletedTask;
     }
 
     void LoadBeatmaps() {
