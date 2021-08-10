@@ -54,7 +54,15 @@
             <RowTemplate>
                 <MudTd DataLabel="Time">@context.Time</MudTd>
                 <MudTd DataLabel="Mode">@context.Mode</MudTd>
-                <MudTd DataLabel="Colour Sequence">@converter.SetFunc(context.ColourSequence)</MudTd>
+                <MudTd DataLabel="Colour Sequence">
+                    <MudChipSet SelectedChipChanged="ChangeSelectedColor" Filter="true" Mandatory="false">
+                        @foreach (int i in context.ColourSequence) {
+                            if (i-1 < 0 || i-1 >= settings.Project.ComboColours.Count) continue;
+                            var comboColour = settings.Project.ComboColours[i-1];
+                            <MudChip Text="@i.ToString()" style="@($"background-color:{comboColour};")"/>
+                        }
+                    </MudChipSet>
+                </MudTd>
             </RowTemplate>
             <RowEditingTemplate>
                 <MudTd DataLabel="Time">
