@@ -3,6 +3,10 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag name'  
     
 jobs:
   deploy-to-github-pages:
@@ -38,3 +42,4 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
+          automatic_release_tag: "${{ github.event.inputs.tag }}"
