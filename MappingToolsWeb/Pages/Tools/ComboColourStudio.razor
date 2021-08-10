@@ -1,0 +1,289 @@
+﻿@page "/combocolourstudio"
+
+@using BlazorDownloadFile
+@using MappingToolsWeb.Shared.Classes.Settings.Api
+@using MappingToolsWeb.Shared.Components.Tools
+@using MappingToolsWeb.Shared.Components.Tools.ComboColourStudio
+@using Mapping_Tools_Core.BeatmapHelper.Enums
+@using Mapping_Tools_Core.BeatmapHelper.IO.Decoding
+@using Mapping_Tools_Core.BeatmapHelper.IO.Encoding
+@using Mapping_Tools_Core.Exceptions
+@using toolNamespace = Mapping_Tools_Core.Tools.ComboColourStudio
+@using System.Text
+@using TG.Blazor.IndexedDB
+@using MudBlazor.Utilities
+
+<ToolBase Name="Combo Colour Studio" DocsPath="@($"docs/{ i18n.CurrentCulture.Name }/combo_colour_studio.md")">
+    <Settings>
+        <ComboColourStudioSettings />
+    </Settings>
+
+    <ActionElement>
+        <MudPaper>
+            <div class="d-flex ma-5">
+                @if (beatmaps.Count > 0) {
+                    <div class="d-flex flex-column flex-grow-1">
+                        <MudSelect AdornmentColor="Color.Secondary" T="IFileRecord" Label="@i18n["tools_hitsoundCopier_destinationBeatmap"]" HelperText="@i18n["tools_hitsoundCopier_beatmapSelectToHelpText"]" @bind-Value="selectedBeatmap">
+                            @foreach (var map in beatmaps) {
+                                <MudSelectItem Value="map">@map.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </div>
+                    <MudButton EndIcon="@Icons.Material.Filled.DoubleArrow" Color="Color.Secondary" OnClick="RunTool" Size="Size.Large" Class="my-5 ml-5">Run</MudButton>
+                }
+                else {
+                    <MudText Color="Color.Secondary" Typo="Typo.subtitle1">@i18n["tools_shared_noBeatmap"]</MudText>
+                }
+            </div>
+            <MudProgressLinear Value="@progress" Color="@progressColor" />
+        </MudPaper>
+    </ActionElement>
+    <Content>
+        <MudTable Items="@settings.Project.ColourPoints" Hover="true" @bind-SelectedItem="selectedItem" SortLabel="Sort By"
+         CommitEditTooltip="Commit Edit">
+            <ColGroup>
+                <col style="width:140px;" />
+                <col style="width:140px;" />
+                <col style="width:50%;" />
+            </ColGroup>
+            <HeaderContent>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ColourPoint, object>(x=>x.Time)">Time</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ColourPoint, object>(x=>x.Mode)">Mode</MudTableSortLabel></MudTh>
+                <MudTh>Colour Sequence</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Time">@context.Time</MudTd>
+                <MudTd DataLabel="Mode">@context.Mode</MudTd>
+                <MudTd DataLabel="Colour Sequence">@converter.SetFunc(context.ColourSequence)</MudTd>
+            </RowTemplate>
+            <RowEditingTemplate>
+                <MudTd DataLabel="Time">
+                    <MudNumericField @bind-Value="@context.Time" Required />
+                </MudTd>
+                <MudTd DataLabel="Mode">
+                    <MudSelect AdornmentColor="Color.Secondary" T="toolNamespace.ColourPointMode" @bind-Value="@context.Mode" Required>
+                        @foreach (var obj in colourPointModes) {
+                            <MudSelectItem Value="obj"></MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd DataLabel="Colour Sequence">
+                    <MudTextField @bind-Value="@context.ColourSequence" Converter="@converter"/>
+                </MudTd>
+            </RowEditingTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+
+        <div class="d-flex flex-row mt5">
+            <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="AddColourPoint" Size="Size.Medium" Class="ma-5">Add</MudButton>
+            <MudButton EndIcon="@Icons.Material.Filled.Remove" Color="Color.Primary" OnClick="RemoveColourPoint" Size="Size.Medium" Class="ma-5">Remove</MudButton>
+        </div>
+
+        <MudPaper Class="d-flex flex-column pa-5">
+            <MudChipSet SelectedChipChanged="ChangeSelectedColor" Filter="true" Mandatory="false">
+                @for (int i = 0; i < settings.Project.ComboColours.Count; i++) {
+                    var comboColour = settings.Project.ComboColours[i];
+                    <MudChip Text="@((i+1).ToString())" style="@($"background-color:{comboColour};")"/>
+                }
+            </MudChipSet>
+            <MudTextField Label="Combo Color Picker" T="string" Value="_pickerColor" ValueChanged="UpdateSelectedColor" Style="@($"color: {_pickerColor};")" />
+        </MudPaper>        
+        <div class="d-flex flex-row mt5">
+            <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="AddComboColour" Size="Size.Medium" Class="ma-5">Add</MudButton>
+            <MudButton EndIcon="@Icons.Material.Filled.Remove" Color="Color.Primary" OnClick="RemoveComboColour" Size="Size.Medium" Class="ma-5">Remove</MudButton>
+        </div>
+    </Content>
+</ToolBase>
+
+@code {
+    [Inject] ILanguageContainerService i18n { get; set; }
+    [Inject] INestedIndexedDbCache<ContentTag, IOrderedRecords<IFileRecord>, IFileRecord> fileCache { get; set; }
+    [Inject] IMappingToolsSettingsService mtSettings { get; set; }
+    [Inject] ISnackbar SnackBar { get; set; }
+    [Inject] IndexedDBManager indexedDb { get; set; }
+    [Inject] IBlazorDownloadFileService downloadService { get; set; }
+
+    double progress = 0;
+    Color progressColor = Color.Primary;
+
+    private ColourPoint selectedItem = null;
+    toolNamespace.ColourPointMode[] colourPointModes = { toolNamespace.ColourPointMode.Normal, toolNamespace.ColourPointMode.Burst };
+    Converter<List<int>> converter = new Converter<List<int>> {
+        SetFunc = value => new string(value.Select(o => (char)('0' + o)).ToArray()),
+        GetFunc = text => text.Select(o => o - '0').ToList(),
+    };
+    void AddColourPoint() {
+        settings.Project.ColourPoints.Add(new ColourPoint { Time = settings.Project.ColourPoints.Max(o => o.Time)});
+    }
+    void RemoveColourPoint() {
+        if (settings.Project.ColourPoints.Count == 0) return;
+        if (selectedItem != null) {
+            settings.Project.ColourPoints.Remove(selectedItem);
+        } else {
+            settings.Project.ColourPoints.RemoveAt(settings.Project.ColourPoints.Count - 1);
+        }
+    }
+
+    string _pickerColor;
+    int selectedColour = 0;
+    MudChip selectedColourItem = null;
+    void ChangeSelectedColor(MudChip item) {
+        selectedColourItem = item;
+        selectedColour = int.Parse(item.Text)-1;
+        _pickerColor = settings.Project.ComboColours[selectedColour].ToString();
+    }
+    void UpdateSelectedColor(string value) {
+        _pickerColor = value;
+
+        settings.Project.ComboColours[selectedColour] = new ComboColour(value);
+    }
+    void AddComboColour() {
+        settings.Project.ComboColours.Add(new ComboColour("#FFFFFF"));
+    }
+    void RemoveComboColour() {
+        if (settings.Project.ComboColours.Count == 0) return;
+        if (selectedColourItem != null) {
+            settings.Project.ComboColours.RemoveAt(selectedColour);
+        } else {
+            settings.Project.ComboColours.RemoveAt(settings.Project.ComboColours.Count - 1);
+        }
+    }
+
+
+    public const string STORAGE_KEY = "settings.combo_colour_studio";
+    ComboColourStudioSettingsModel settings = new ComboColourStudioSettingsModel();
+
+    IFileRecord selectedBeatmap;
+    List<IFileRecord> beatmaps = new List<IFileRecord>();
+
+    protected override async Task OnInitializedAsync() {
+        fileCache.CacheHasChanged += OnCacheChanged;
+
+        i18n.InitLocalizedComponent(this);
+
+        LoadBeatmaps();
+        
+        settings = await mtSettings.GetSettingsAsync<ComboColourStudioSettingsModel>(STORAGE_KEY);
+    }
+
+    async Task RunTool() {
+        progressColor = Color.Primary;
+        progress = 0;
+
+        StateHasChanged();
+
+        if (selectedBeatmap?.Data == null || selectedBeatmap?.Data == null) {
+            SnackBar.Add(i18n["tools_shared_noBeatmapData"], Severity.Error);
+            return;
+        }
+
+        var dataTo = Encoding.UTF8.GetString(selectedBeatmap.Data, 0, selectedBeatmap.Data.Length);
+
+        if (string.IsNullOrWhiteSpace(dataTo)) {
+            SnackBar.Add(i18n["tools_shared_beatmapStringEncodeError"], Severity.Error);
+            return;
+        }
+
+        await UpdateProgress(10);
+
+        try {
+            var decoder = new OsuBeatmapDecoder();
+            var beatmapTo = decoder.Decode(dataTo);
+
+            await UpdateProgress(30);
+
+            toolNamespace.ColourHaxExporter.ExportColourHax(settings.Project, beatmapTo);
+
+            await UpdateProgress(50);
+
+            var encoded = new OsuBeatmapEncoder().Encode(beatmapTo);
+
+            await UpdateProgress(60);
+
+            await indexedDb.AddRecord(new StoreRecord<IBackupRecord> {
+                Storename = "backups",
+                Data = new BackupRecord
+                {
+                    File = selectedBeatmap as FileRecord, // !!!! workaround for shit language not being able to use interfaces smh
+                    ToolName = "Combo Colour Studio",
+                    BackedUpOn = DateTime.Now
+                }
+            });
+
+            await UpdateProgress(70);
+
+            var newFileRecord = new FileRecord {
+                Id = selectedBeatmap.Id,
+                Name = selectedBeatmap.Name,
+                Tag = selectedBeatmap.Tag,
+                Data = Encoding.UTF8.GetBytes(encoded),
+                LastModified = DateTime.Now
+            };
+
+            await fileCache.ReplaceAsync(selectedBeatmap, newFileRecord);
+
+           await  UpdateProgress(90);
+
+            var snackBarString = "Successfully exported colours!";
+
+            SnackBar.Add(snackBarString, Severity.Success);
+
+            var progress = new Progress<double>();
+
+            progress.ProgressChanged += OnDownloadProgressChanged;
+
+            await downloadService.DownloadFile(newFileRecord.Name, newFileRecord.Data, progress: progress);
+        }
+        catch (BeatmapParsingException) {
+            SnackBar.Add(i18n["tools_shared_beatmapParseError"], Severity.Error);
+        }
+        catch (Exception e) {
+            SnackBar.Add(e.Message + "\n" + e.StackTrace, Severity.Error);
+        }
+    }
+
+    async void OnDownloadProgressChanged(object sender, double progress) {
+        await UpdateProgress(100);
+    }
+
+    async Task UpdateProgress(double progress) {
+        if (progress == 100) {
+            progressColor = Color.Success;
+            this.progress = 100;
+
+            StateHasChanged();
+
+            await Task.Delay(3000);
+
+            this.progress = 0;
+            progressColor = Color.Primary;
+        }
+        else {
+            this.progress = progress;
+        }
+
+        StateHasChanged();
+    }
+
+    void LoadBeatmaps() {
+        if (fileCache.TryGetValue(ContentTag.OsuBeatmap, out var maps)) {
+            beatmaps = maps.OrderedRecords;
+        }
+        else
+        {
+            beatmaps = new List<IFileRecord>();
+        }
+
+        if (!beatmaps.Contains(selectedBeatmap)) {
+            selectedBeatmap = null;
+        }
+    }
+
+    void OnCacheChanged(object sender, EventArgs e) {
+        LoadBeatmaps();
+
+        StateHasChanged();
+    }
+}
