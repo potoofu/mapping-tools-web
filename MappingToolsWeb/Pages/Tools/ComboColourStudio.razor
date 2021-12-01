@@ -57,9 +57,9 @@
                 <MudTd DataLabel="Colour Sequence">
                     <MudChipSet SelectedChipChanged="ChangeSelectedColor" Filter="true" Mandatory="false">
                         @foreach (int i in context.ColourSequence) {
-                            if (i-1 < 0 || i-1 >= settings.Project.ComboColours.Count) continue;
-                            var comboColour = settings.Project.ComboColours[i-1];
-                            <MudChip Text="@i.ToString()" style="@($"background-color:{comboColour};")"/>
+                            if (i < 0 || i >= settings.Project.ComboColours.Count) continue;
+                            var comboColour = settings.Project.ComboColours[i];
+                            <MudChip Text="@((i+1).ToString())" style="@($"background-color:{comboColour};")"/>
                         }
                     </MudChipSet>
                 </MudTd>
@@ -148,8 +148,8 @@
     private ColourPoint selectedItem = null;
     toolNamespace.ColourPointMode[] colourPointModes = { toolNamespace.ColourPointMode.Normal, toolNamespace.ColourPointMode.Burst };
     Converter<List<int>> converter = new Converter<List<int>> {
-        SetFunc = value => new string(value.Select(o => (char)('0' + o)).ToArray()),
-        GetFunc = text => text.Select(o => o - '0').ToList(),
+        SetFunc = value => new string(value.Select(o => (char)('1' + o)).ToArray()),
+        GetFunc = text => text.Select(o => o - '1').ToList(),
     };
     void AddColourPoint() {
         settings.Project.ColourPoints.Add(new ColourPoint { Time = settings.Project.ColourPoints.Max(o => o.Time)});
